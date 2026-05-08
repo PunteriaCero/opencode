@@ -4,12 +4,14 @@
     "portainer": {
       "type": "local",
       "command": [
-        "/usr/local/bin/portainer-mcp",
-        "-server", "192.168.0.214:9000",
-        "-token", "{env:PORTAINER_PAT}",
-        "-disable-version-check"
+        "node",
+        "/root/.config/opencode/mcp-servers/portainer.mjs"
       ],
-      "enabled": true
+      "enabled": true,
+      "environment": {
+        "PORTAINER_URL": "http://192.168.0.214:9000",
+        "PORTAINER_PAT": "{env:PORTAINER_PAT}"
+      }
     },
     "github": {
       "type": "local",
