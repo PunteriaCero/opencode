@@ -4,8 +4,9 @@
     "portainer": {
       "type": "local",
       "command": [
-        "node",
-        "/root/.config/opencode/mcp-servers/portainer.mjs"
+        "npx",
+        "-y",
+        "portainer-mcp-server"
       ],
       "enabled": true,
       "environment": {
