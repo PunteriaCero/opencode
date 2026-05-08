@@ -1,0 +1,38 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "github": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "enabled": true,
+      "environment": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "{env:GITHUB_PAT}"
+      }
+    },
+    "gdrive": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-gdrive"
+      ],
+      "enabled": true,
+      "environment": {
+        "GDRIVE_CLIENT_ID": "{env:GDRIVE_CLIENT_ID}",
+        "GDRIVE_CLIENT_SECRET": "{env:GDRIVE_CLIENT_SECRET}"
+      }
+    },
+    "home-assistant": {
+      "type": "remote",
+      "url": "{env:HA_URL}/api/mcp",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer {env:HA_PAT}"
+      }
+    }
+  }
+}
