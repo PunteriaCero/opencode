@@ -28,12 +28,13 @@
       "command": [
         "npx",
         "-y",
-        "@modelcontextprotocol/server-gdrive"
+        "mcp-google-drive"
       ],
       "enabled": true,
       "environment": {
-        "GDRIVE_CLIENT_ID": "{env:GDRIVE_CLIENT_ID}",
-        "GDRIVE_CLIENT_SECRET": "{env:GDRIVE_CLIENT_SECRET}"
+        "GOOGLE_CLIENT_ID": "{env:GDRIVE_CLIENT_ID}",
+        "GOOGLE_CLIENT_SECRET": "{env:GDRIVE_CLIENT_SECRET}",
+        "GOOGLE_REFRESH_TOKEN": "{env:GOOGLE_REFRESH_TOKEN}"
       }
     },
     "home-assistant": {
