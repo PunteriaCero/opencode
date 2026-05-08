@@ -34,7 +34,8 @@
       "environment": {
         "GOOGLE_CLIENT_ID": "{env:GDRIVE_CLIENT_ID}",
         "GOOGLE_CLIENT_SECRET": "{env:GDRIVE_CLIENT_SECRET}",
-        "GOOGLE_REFRESH_TOKEN": "{env:GOOGLE_REFRESH_TOKEN}"
+        "GOOGLE_REFRESH_TOKEN": "{env:GOOGLE_REFRESH_TOKEN}",
+        "GOOGLE_DRIVE_ALLOW_WRITE": "true"
       }
     },
     "home-assistant": {
