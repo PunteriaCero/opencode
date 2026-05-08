@@ -28,7 +28,7 @@
       "command": [
         "npx",
         "-y",
-        "mcp-google-drive"
+        "@hachiai/mcp-google-drive"
       ],
       "enabled": true,
       "environment": {
