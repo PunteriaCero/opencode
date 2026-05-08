@@ -17,3 +17,11 @@ After committing any change to `/root/.config/opencode`, you MUST restart the Op
 ```
 POST /containers/opencode/restart
 ```
+
+## Push changes to GitHub
+
+Always use git CLI to commit and push changes. NEVER use MCP GitHub tools (`github_push_files`, `github_create_or_update_file`, etc.) for this purpose. Use:
+
+```bash
+git add -A && git commit -m "message" && git push
+```
