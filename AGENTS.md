@@ -1,5 +1,27 @@
 # OpenCode Global Rules
 
+## Portainer Access
+
+**The agent MUST ALWAYS use the Portainer MCP tools for any Docker/Portainer operations.** NEVER use direct curl/bash commands to access Portainer.
+
+Available Portainer MCP tools:
+- `list_environments` - List all Portainer environments
+- `list_containers` - List containers in an environment
+- `inspect_container` - Get detailed container info
+- `get_container_logs` - Get container logs
+- `start_container` - Start a stopped container
+- `stop_container` - Stop a running container
+- `restart_container` - Restart a container
+- `pull_image` - Pull a Docker image
+- `delete_image` - Delete a Docker image
+- `recreate_container` - Recreate a container with updated image
+- `list_stacks` - List all stacks
+- `inspect_stack` - Get stack details
+- `get_stack_file` - Get docker-compose file content
+- `list_images` - List Docker images
+- `list_networks` - List Docker networks
+- `list_volumes` - List Docker volumes
+
 ## GitHub Authentication
 
 The agent MUST use the `GITHUB_PAT` environment variable for all git operations. Configure git to use the PAT token by setting the git credential helper:
@@ -31,11 +53,9 @@ cd /root/.config/opencode && git -c credential.helper='!echo "username=git"; ech
 
 ## Restart OpenCode after config changes
 
-After successfully pushing changes to GitHub from `/root/.config/opencode`, you MUST restart the OpenCode container via Portainer so the new config takes effect. Use the Docker API proxy through the Portainer MCP (environment ID 3) to restart the container named `opencode`:
-
-```
-POST /containers/opencode/restart
-```
+After successfully pushing changes to GitHub from `/root/.config/opencode`, you MUST restart the OpenCode container via Portainer MCP using the `restart_container` tool with:
+- environmentId: 3
+- containerId: opencode
 
 ## Push changes to GitHub (General Rule)
 
@@ -63,3 +83,4 @@ Then use standard git commands:
 ```bash
 git add -A && git commit -m "message" && git push
 ```
+
