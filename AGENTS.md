@@ -4,7 +4,37 @@
 
 **The agent MUST ALWAYS use the N8N MCP tools for any N8N workflow automation operations.**
 
-The N8N MCP server connects to `http://192.168.0.177:5678` and requires the `N8N_API_KEY` environment variable to be set in the OpenCode container.
+The N8N MCP server is connected as a **native remote MCP endpoint**. The connection is configured via two environment variables in the OpenCode container:
+- `N8N_MCP_URL` - Full URL to the N8N MCP server (e.g. `http://192.168.0.177:5678/mcp-server/http`)
+- `N8N_API_KEY` - JWT API key generated from N8N Settings > API > API Keys (audience: `mcp-server-api`)
+
+### Available N8N MCP tools
+
+- `n8n_search_workflows` - Search/list workflows (supports `query` and `limit` filters)
+- `n8n_get_workflow_details` - Get full details of a workflow by ID
+- `n8n_execute_workflow` - Execute a workflow by ID with inputs (chat, form, or webhook type)
+
+### How to use
+
+**List workflows:**
+```
+n8n_search_workflows(query="keyword", limit=10)
+```
+
+**Get workflow details (always do this before executing to understand inputs):**
+```
+n8n_get_workflow_details(workflowId="abc123")
+```
+
+**Execute a workflow:**
+- Chat-based: `inputs: { type: "chat", chatInput: "message" }`
+- Form-based: `inputs: { type: "form", formData: { key: "value" } }`
+- Webhook-based: `inputs: { type: "webhook", webhookData: { method: "POST", body: {}, headers: {}, query: {} } }`
+
+### Important rules
+- ALWAYS call `n8n_get_workflow_details` before `n8n_execute_workflow` to understand the expected input schema and workflow description.
+- NEVER guess workflow IDs — always search first with `n8n_search_workflows`.
+- Use N8N MCP tools instead of direct HTTP calls to the N8N API.
 
 ## Portainer Access
 
