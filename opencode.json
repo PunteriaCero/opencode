@@ -50,11 +50,16 @@
       }
     },
     "n8n": {
-      "type": "remote",
-      "url": "{env:N8N_MCP_URL}",
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@leonardsellem/n8n-mcp-server"
+      ],
       "enabled": true,
-      "headers": {
-        "Authorization": "Bearer {env:N8N_API_KEY}"
+      "environment": {
+        "N8N_API_URL": "{env:N8N_API_URL}",
+        "N8N_API_KEY": "{env:N8N_API_KEY}"
       }
     }
   }
