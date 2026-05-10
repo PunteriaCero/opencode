@@ -50,16 +50,11 @@
       }
     },
     "n8n": {
-      "type": "local",
-      "command": [
-        "npx",
-        "-y",
-        "@n8n/n8n-mcp"
-      ],
+      "type": "remote",
+      "url": "http://192.168.0.177:5678/mcp-server/http",
       "enabled": true,
-      "environment": {
-        "N8N_URL": "http://192.168.0.177:5678",
-        "N8N_API_KEY": "{env:N8N_API_KEY}"
+      "headers": {
+        "Authorization": "Bearer {env:N8N_API_KEY}"
       }
     }
   }
