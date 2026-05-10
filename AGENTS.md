@@ -58,43 +58,26 @@ Available Portainer MCP tools:
 - `list_networks` - List Docker networks
 - `list_volumes` - List Docker volumes
 
-### Public API Endpoints (No Authentication Required)
+### New MCP Tools for Image Management
 
-The Portainer MCP Server also exposes public HTTP endpoints for Docker image management. These endpoints do NOT require authentication and can be accessed directly via HTTP.
+Two new MCP tools have been added for managing unused Docker images:
 
-**Base URL:**
+- `portainer_list_unused_images` - List Docker images not used by any container (dangling images)
+- `portainer_cleanup_unused_images` - Delete all unused Docker images with optional force flag
+
+**Usage:**
+
+List unused images:
 ```
-http://localhost:3000  (configurable via PUBLIC_PORT environment variable)
+portainer_list_unused_images(environmentId=1)
 ```
 
-**Available Public Endpoints:**
+Clean up unused images:
+```
+portainer_cleanup_unused_images(environmentId=1, force=false)
+```
 
-1. **GET /api/images** - List all Docker images
-   ```
-   curl http://localhost:3000/api/images?environmentId=1
-   ```
-   Response: List of all Docker images with tags, size, creation date
-
-2. **GET /api/images/unused** - List unused Docker images
-   ```
-   curl http://localhost:3000/api/images/unused?environmentId=1
-   ```
-   Response: List of images not used by any container (dangling images)
-
-3. **POST /api/images/cleanup** - Delete unused Docker images
-   ```
-   curl -X POST http://localhost:3000/api/images/cleanup?environmentId=1&force=false
-   ```
-   Response: Report of deleted and failed images
-
-**Query Parameters:**
-- `environmentId` (optional): Portainer environment ID (default: 1)
-- `force` (optional, cleanup only): Force delete even if image is in use (default: false)
-
-**When to use Public API vs MCP tools:**
-- Use **MCP tools** for programmatic operations within OpenCode workflows
-- Use **Public API endpoints** for direct HTTP requests from external tools/scripts
-- The public API is ideal for CI/CD pipelines, webhooks, and standalone utilities
+**Note:** The Portainer MCP Server also exposes public HTTP endpoints for external CI/CD pipelines and webhooks (no authentication required). See PORTAINER_PUBLIC_API.md for integration with external systems.
 
 ## GitHub Authentication
 
