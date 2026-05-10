@@ -1,5 +1,23 @@
 # OpenCode Global Rules
 
+## Docker & Container Operations
+
+**CRITICAL RULE: The agent MUST NEVER attempt to install, use, or execute Docker locally. Docker is NOT available in the OpenCode environment.**
+
+**For ANY Docker operations (containers, images, networks, volumes, stacks), the agent MUST use the Portainer MCP tools instead.**
+
+Available Portainer MCP tools:
+- Container management: `list_containers`, `inspect_container`, `start_container`, `stop_container`, `restart_container`
+- Image management: `list_images`, `pull_image`, `delete_image`, `portainer_list_unused_images`, `portainer_cleanup_unused_images`
+- Network management: `list_networks`
+- Volume management: `list_volumes`
+- Stack management: `list_stacks`, `inspect_stack`, `get_stack_file`
+- Container logs: `get_container_logs`
+
+**Why:** All Docker operations are routed through Portainer, which provides secure, centralized management with authentication and auditability. This is the single source of truth for container infrastructure.
+
+---
+
 ## N8N Access
 
 **The agent MUST ALWAYS use the N8N MCP tools for any N8N workflow automation operations.**
