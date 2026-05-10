@@ -58,6 +58,44 @@ Available Portainer MCP tools:
 - `list_networks` - List Docker networks
 - `list_volumes` - List Docker volumes
 
+### Public API Endpoints (No Authentication Required)
+
+The Portainer MCP Server also exposes public HTTP endpoints for Docker image management. These endpoints do NOT require authentication and can be accessed directly via HTTP.
+
+**Base URL:**
+```
+http://localhost:3000  (configurable via PUBLIC_PORT environment variable)
+```
+
+**Available Public Endpoints:**
+
+1. **GET /api/images** - List all Docker images
+   ```
+   curl http://localhost:3000/api/images?environmentId=1
+   ```
+   Response: List of all Docker images with tags, size, creation date
+
+2. **GET /api/images/unused** - List unused Docker images
+   ```
+   curl http://localhost:3000/api/images/unused?environmentId=1
+   ```
+   Response: List of images not used by any container (dangling images)
+
+3. **POST /api/images/cleanup** - Delete unused Docker images
+   ```
+   curl -X POST http://localhost:3000/api/images/cleanup?environmentId=1&force=false
+   ```
+   Response: Report of deleted and failed images
+
+**Query Parameters:**
+- `environmentId` (optional): Portainer environment ID (default: 1)
+- `force` (optional, cleanup only): Force delete even if image is in use (default: false)
+
+**When to use Public API vs MCP tools:**
+- Use **MCP tools** for programmatic operations within OpenCode workflows
+- Use **Public API endpoints** for direct HTTP requests from external tools/scripts
+- The public API is ideal for CI/CD pipelines, webhooks, and standalone utilities
+
 ## GitHub Authentication
 
 The agent MUST use the `GITHUB_PAT` environment variable for all git operations. Configure git to use the PAT token by setting the git credential helper:
