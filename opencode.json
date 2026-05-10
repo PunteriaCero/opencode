@@ -51,7 +51,7 @@
     },
     "n8n": {
       "type": "remote",
-      "url": "http://192.168.0.177:5678/mcp-server/http",
+      "url": "{env:N8N_MCP_URL}",
       "enabled": true,
       "headers": {
         "Authorization": "Bearer {env:N8N_API_KEY}"
