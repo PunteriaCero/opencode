@@ -1,5 +1,11 @@
 # OpenCode Global Rules
 
+## N8N Access
+
+**The agent MUST ALWAYS use the N8N MCP tools for any N8N workflow automation operations.**
+
+The N8N MCP server connects to `http://192.168.0.177:5678` and requires the `N8N_API_KEY` environment variable to be set in the OpenCode container.
+
 ## Portainer Access
 
 **The agent MUST ALWAYS use the Portainer MCP tools for any Docker/Portainer operations.** NEVER use direct curl/bash commands to access Portainer.
