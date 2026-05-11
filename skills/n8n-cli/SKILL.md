@@ -27,29 +27,64 @@ Load this skill when the user asks to:
 
 ## Authentication
 
-`n8n-cli` is authenticated via environment variables. **Important**: n8n CLI uses `N8N_HOST` and `N8N_API_KEY`, which may differ from `N8N_API_URL`.
+⚠️ **IMPORTANT: You MUST set N8N_HOST and N8N_API_KEY from environment variables before running any commands.**
 
-**Environment variables:**
+### Required Environment Variables
+
+The n8n-cli requires these environment variables to be set:
 - `N8N_HOST` - Base URL to the N8N instance (e.g. `http://192.168.0.177:5678`)
-- `N8N_API_KEY` - API key generated from N8N Settings > API > API Keys
+- `N8N_API_KEY` - API token for authentication
 
-**Quick setup from existing environment:**
+### Step 1: Extract Environment Variables
+
+**Always check what's available in your environment:**
 ```bash
-# Extract N8N_HOST from N8N_API_URL if needed
-export N8N_HOST="http://192.168.0.177:5678"
-export N8N_API_KEY="your-api-key-here"
+env | grep -i n8n
 ```
 
-**Verify connection:**
+This will show you the available N8N variables. Look for:
+- `N8N_API_URL` - Contains the host URL
+- `N8N_API_KEY` - Contains the authentication token
+
+### Step 2: Export Required Variables
+
+**Before running ANY n8n command, export the variables:**
+```bash
+# From N8N_API_URL, extract just the host
+export N8N_HOST="http://192.168.0.177:5678"
+
+# Use the N8N_API_KEY token directly
+export N8N_API_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+### Step 3: Verify Connection
+
 ```bash
 n8n auth status          # Check authentication and connectivity
 n8n health              # Verify n8n instance is running
 ```
 
-**Common issues and solutions:**
-- **Connection refused**: Ensure N8N instance is running and `N8N_HOST` is correct
-- **Authentication failed**: Verify `N8N_API_KEY` is valid in N8N Settings > API > API Keys
-- **Use environment variables directly**: Always extract credentials from environment first: `env | grep -i n8n`
+### Common Mistakes to Avoid
+
+❌ **WRONG**: Don't use `N8N_API_URL` directly - it includes `/api/v1` path
+```bash
+# This will fail:
+export N8N_HOST="$N8N_API_URL"  # Don't do this!
+```
+
+✅ **CORRECT**: Extract just the base URL
+```bash
+# Extract from N8N_API_URL (remove /api/v1)
+export N8N_HOST="http://192.168.0.177:5678"
+export N8N_API_KEY="$N8N_API_KEY"  # Use the token as-is
+```
+
+### Connection Troubleshooting
+
+If you get "Unable to connect" errors:
+1. Run `env | grep -i n8n` to verify variables exist
+2. Verify `N8N_HOST` is just the base URL (no `/api/v1`)
+3. Run `n8n auth status` to see the connection details
 
 ## Key commands reference
 
@@ -95,13 +130,24 @@ n8n health                                      # Check n8n instance health
 
 ## Common workflows
 
+### ⚠️ PREREQUISITE: Set Environment Variables First
+
+**Before any command below, you MUST export the variables:**
+```bash
+# Step 1: Check what's available
+env | grep -i n8n
+
+# Step 2: Export N8N_HOST and N8N_API_KEY
+export N8N_HOST="http://192.168.0.177:5678"      # From N8N_API_URL, remove /api/v1
+export N8N_API_KEY="your-token-from-env"          # Copy from N8N_API_KEY environment variable
+
+# Step 3: Verify it works
+n8n auth status
+```
+
 ### Quick start - List all workflows
 ```bash
-# Ensure environment variables are set
-export N8N_HOST="http://192.168.0.177:5678"
-export N8N_API_KEY="your-api-key"
-
-# List workflows in table format
+# List workflows in table format (requires N8N_HOST and N8N_API_KEY set)
 n8n workflows list
 
 # List workflows in JSON format
@@ -163,14 +209,16 @@ n8n executions retry <execution-id>
 
 ## Best practices
 
-1. **Always verify workflow details before executing**: Use `n8n workflow get --workflow=<id>` to understand inputs and outputs.
-2. **Use JSON format for scripting**: Use `--format=json` and pipe to `jq` for filtering and processing.
-3. **Check execution status after running**: List executions with `n8n execution list --workflow=<id>` to verify success.
-4. **Export workflows before major changes**: Create backups with `n8n workflow export` before modifying.
-5. **Handle errors gracefully**: Check execution status and use `n8n execution retry` for failed executions.
-6. **Use proper JSON filtering**: Combine `--format=json` with `jq` for precise data extraction.
-7. **Never guess workflow IDs**: Always list workflows first to get accurate IDs.
-8. **Keep credentials secure**: Export credentials only when necessary, use credential IDs carefully.
+1. **ALWAYS set environment variables first**: Before running ANY n8n command, ensure `N8N_HOST` and `N8N_API_KEY` are exported
+2. **Extract from existing environment**: Run `env | grep -i n8n` to find available credentials
+3. **Use correct host format**: `N8N_HOST` should be just the base URL (e.g., `http://192.168.0.177:5678`), NOT including `/api/v1`
+4. **Verify connection before proceeding**: Use `n8n auth status` to confirm connectivity
+5. **Verify workflow details before executing**: Use `n8n workflows get <id>` to understand inputs and outputs
+6. **Use JSON format for scripting**: Use `--json` flag and pipe to `jq` for filtering and processing
+7. **Check execution status after running**: List executions with `n8n executions list` to verify success
+8. **Export workflows before major changes**: Create backups with `n8n workflows export` before modifying
+9. **Never guess workflow IDs**: Always list workflows first with `n8n workflows list` to get accurate IDs
+10. **Handle errors gracefully**: Check execution status and use `n8n executions retry` for failed executions
 
 ## Output formats
 
@@ -248,7 +296,48 @@ n8n workflows list          # Correct
 - Verify JSON structure with: `n8n workflows list --json | jq '.'`
 
 ### Quick diagnostic command
+
+**If you get connection errors, run this:**
 ```bash
+# Check environment variables are set
+env | grep -i n8n
+
+# Export them
+export N8N_HOST="http://192.168.0.177:5678"
+export N8N_API_KEY="your-token"
+
 # Run all checks at once
 n8n auth status && n8n health && n8n workflows list
 ```
+
+### Complete troubleshooting checklist
+
+1. ✅ Environment variables exist
+   ```bash
+   env | grep -i n8n
+   ```
+
+2. ✅ Export required variables
+   ```bash
+   export N8N_HOST="http://192.168.0.177:5678"
+   export N8N_API_KEY="eyJhbGciOi..."
+   ```
+
+3. ✅ Verify connection
+   ```bash
+   n8n auth status
+   ```
+
+4. ✅ Check N8N instance is running
+   ```bash
+   n8n health
+   ```
+
+5. ✅ Try listing workflows
+   ```bash
+   n8n workflows list
+   ```
+
+**If step 1 fails**: Environment variables are not set. Ask where to get them.
+**If step 3 fails**: `N8N_HOST` or `N8N_API_KEY` is incorrect.
+**If step 5 fails**: Connection issue or credentials invalid. Check steps 1-4.
