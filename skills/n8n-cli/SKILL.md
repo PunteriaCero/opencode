@@ -27,104 +27,138 @@ Load this skill when the user asks to:
 
 ## Authentication
 
-`n8n-cli` is authenticated via environment variables:
+`n8n-cli` is authenticated via environment variables. **Important**: n8n CLI uses `N8N_HOST` and `N8N_API_KEY`, which may differ from `N8N_API_URL`.
+
+**Environment variables:**
 - `N8N_HOST` - Base URL to the N8N instance (e.g. `http://192.168.0.177:5678`)
 - `N8N_API_KEY` - API key generated from N8N Settings > API > API Keys
 
-If `N8N_HOST` is not set, ensure it's configured:
+**Quick setup from existing environment:**
 ```bash
+# Extract N8N_HOST from N8N_API_URL if needed
 export N8N_HOST="http://192.168.0.177:5678"
+export N8N_API_KEY="your-api-key-here"
 ```
 
-To verify authentication: `n8n health`
+**Verify connection:**
+```bash
+n8n auth status          # Check authentication and connectivity
+n8n health              # Verify n8n instance is running
+```
+
+**Common issues and solutions:**
+- **Connection refused**: Ensure N8N instance is running and `N8N_HOST` is correct
+- **Authentication failed**: Verify `N8N_API_KEY` is valid in N8N Settings > API > API Keys
+- **Use environment variables directly**: Always extract credentials from environment first: `env | grep -i n8n`
 
 ## Key commands reference
 
 ### Workflow Management
 ```bash
-n8n workflow list                              # List all workflows
-n8n workflow list --format=json                # List workflows in JSON format
-n8n workflow get --workflow=<id>               # Get workflow details
-n8n workflow export --workflow=<id>            # Export workflow to JSON
-n8n workflow import --file=workflow.json       # Import workflow from JSON
-n8n workflow activate --workflow=<id>          # Activate a workflow
-n8n workflow deactivate --workflow=<id>        # Deactivate a workflow
-n8n workflow delete --workflow=<id>            # Delete a workflow
-n8n workflow execute --workflow=<id>           # Execute a workflow
+n8n workflows list                              # List all workflows (main command)
+n8n workflows get <workflow-id>                 # Get workflow details
+n8n workflows export <workflow-id>              # Export workflow to JSON
+n8n workflows import --file=workflow.json       # Import workflow from JSON
+n8n workflows activate <workflow-id>            # Activate a workflow
+n8n workflows deactivate <workflow-id>          # Deactivate a workflow
+n8n workflows delete <workflow-id>              # Delete a workflow
+n8n workflows execute <workflow-id>             # Execute a workflow
 ```
 
 ### Workflow Execution
 ```bash
-n8n execution list                             # List recent executions
-n8n execution list --workflow=<id>             # List executions for specific workflow
-n8n execution list --format=json               # List executions in JSON format
-n8n execution get --execution=<id>             # Get execution details
-n8n execution delete --execution=<id>          # Delete an execution
-n8n execution retry --execution=<id>           # Retry a failed execution
+n8n executions list                             # List recent executions
+n8n executions list --workflow-id=<id>          # List executions for specific workflow
+n8n executions get <execution-id>               # Get execution details
+n8n executions delete <execution-id>            # Delete an execution
+n8n executions retry <execution-id>             # Retry a failed execution
 ```
 
 ### Credential Management
 ```bash
-n8n credentials list                           # List all credentials
-n8n credentials list --format=json             # List credentials in JSON format
-n8n credentials export --credential=<id>       # Export a credential
-n8n credentials import --file=cred.json        # Import a credential
+n8n credentials list                            # List all credentials
+n8n credentials export <credential-id>          # Export a credential
+n8n credentials import --file=cred.json         # Import a credential
 ```
 
 ### Node Management
 ```bash
-n8n node list                                  # List available nodes
-n8n node list --format=json                    # List nodes in JSON format
+n8n nodes list                                  # List available nodes
+n8n nodes search <search-term>                  # Search for specific nodes
+```
+
+### Other utilities
+```bash
+n8n auth status                                 # Check authentication status and connectivity
+n8n health                                      # Check n8n instance health
 ```
 
 ## Common workflows
 
-### List all workflows and filter
+### Quick start - List all workflows
 ```bash
-n8n workflow list --format=json | jq '.[] | {id, name, active}'
+# Ensure environment variables are set
+export N8N_HOST="http://192.168.0.177:5678"
+export N8N_API_KEY="your-api-key"
+
+# List workflows in table format
+n8n workflows list
+
+# List workflows in JSON format
+n8n workflows list --json | jq '.data[] | {id, name, active}'
 ```
 
 ### Get workflow details before executing
 ```bash
-n8n workflow get --workflow=abc123
+n8n workflows get <workflow-id>
 ```
 
 ### Execute a workflow
 ```bash
-n8n workflow execute --workflow=abc123
+n8n workflows execute <workflow-id>
 ```
 
 ### Export a workflow for backup
 ```bash
-n8n workflow export --workflow=abc123 > workflow-backup.json
+n8n workflows export <workflow-id> > workflow-backup.json
 ```
 
 ### Import a workflow from backup
 ```bash
-n8n workflow import --file=workflow-backup.json
+n8n workflows import --file=workflow-backup.json
+```
+
+### Filter active workflows
+```bash
+n8n workflows list --json | jq '.data[] | select(.active == true)'
+```
+
+### Filter inactive workflows
+```bash
+n8n workflows list --json | jq '.data[] | select(.active == false)'
+```
+
+### Get workflow names only
+```bash
+n8n workflows list --json | jq -r '.data[] | .name'
 ```
 
 ### Activate multiple workflows
 ```bash
-n8n workflow list --format=json | jq -r '.[] | .id' | while read id; do
-  n8n workflow activate --workflow=$id
+n8n workflows list --json | jq -r '.data[] | .id' | while read id; do
+  n8n workflows activate "$id"
 done
 ```
 
 ### List failed executions
 ```bash
-n8n execution list --format=json | jq '.[] | select(.status == "failed")'
+n8n executions list --json | jq '.data[] | select(.status == "failed")'
 ```
 
 ### Get execution details and retry
 ```bash
-n8n execution get --execution=def456
-n8n execution retry --execution=def456
-```
-
-### List credentials with sensitive data handling
-```bash
-n8n credentials list --format=json | jq '.[] | {id, name, type}'
+n8n executions get <execution-id>
+n8n executions retry <execution-id>
 ```
 
 ## Best practices
@@ -141,31 +175,80 @@ n8n credentials list --format=json | jq '.[] | {id, name, type}'
 ## Output formats
 
 Most commands support:
-- Default table format (human-readable)
-- `--format=json` — output JSON format
-- Pipe to `jq` for filtering: `n8n workflow list --format=json | jq`
+- Default table format (human-readable) - Shows formatted tables with status indicators
+- `--json` flag — output JSON format for programmatic processing
+- Pipe to `jq` for filtering and transforming data
 
 ### Examples
 ```bash
-# Get workflow names only
-n8n workflow list --format=json | jq -r '.[] | .name'
+# List all workflows in table format
+n8n workflows list
 
-# Filter active workflows
-n8n workflow list --format=json | jq '.[] | select(.active == true)'
+# Get workflow details in JSON
+n8n workflows list --json | jq '.data[] | {id, name, active, nodes}'
+
+# Filter active workflows only
+n8n workflows list --json | jq '.data[] | select(.active == true)'
 
 # Count total workflows
-n8n workflow list --format=json | jq 'length'
+n8n workflows list --json | jq '.data | length'
+
+# Export as CSV-like format
+n8n workflows list --json | jq -r '.data[] | "\(.id),\(.name),\(.active)"'
 
 # Format execution data
-n8n execution list --format=json | jq '.[] | {id, status, startTime, endTime}'
+n8n executions list --json | jq '.data[] | {id, status, startTime, endTime}'
 ```
 
 ## Troubleshooting
 
-**Authentication error**: Verify `N8N_API_URL` and `N8N_API_KEY` environment variables are set correctly.
+### Connection Issues
 
-**Workflow not found**: Use `n8n workflow list` to get the exact workflow ID.
+**Error: "Unable to connect to n8n"**
+```bash
+# 1. Check if environment variables are set
+env | grep -i n8n
 
-**Execution failed**: Check execution details with `n8n execution get --execution=<id>` and retry with `n8n execution retry --execution=<id>`.
+# 2. If missing, extract from existing variables
+export N8N_HOST="http://192.168.0.177:5678"
+export N8N_API_KEY="your-api-key"
 
-**JSON parsing errors**: Ensure you're using `--format=json` flag and proper `jq` syntax for filtering.
+# 3. Verify connection
+n8n auth status
+n8n health
+```
+
+**Connection refused**
+- Ensure N8N instance is running
+- Verify `N8N_HOST` URL is correct and accessible
+- Check firewall rules if N8N is on a different machine
+
+### Authentication Issues
+
+**Authentication error**
+```bash
+# Verify credentials
+n8n auth status
+
+# Check API key in N8N Settings > API > API Keys
+# Ensure N8N_API_KEY is set to a valid token
+```
+
+### Command Issues
+
+**Workflow not found**: Use full command with `workflows` (plural) not `workflow` (singular)
+```bash
+n8n workflows list          # Correct
+# n8n workflow list         # Incorrect - will fail
+```
+
+**JSON parsing errors**
+- Use `--json` flag (not `--format=json`)
+- Ensure `jq` is installed: `jq --version`
+- Verify JSON structure with: `n8n workflows list --json | jq '.'`
+
+### Quick diagnostic command
+```bash
+# Run all checks at once
+n8n auth status && n8n health && n8n workflows list
+```
