@@ -56,7 +56,7 @@
         "node",
         "/root/.config/opencode/mcp-servers/n8n-server.js"
       ],
-      "enabled": true,
+      "enabled": false,
       "environment": {
         "N8N_API_URL": "{env:N8N_API_URL}",
         "N8N_API_KEY": "{env:N8N_API_KEY}"
