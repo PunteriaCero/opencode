@@ -14,90 +14,114 @@ The Portainer CLI is pre-installed globally and automatically configured with cr
 
 ## N8N Access
 
-**The agent MUST ALWAYS use the N8N MCP tools for any N8N workflow automation operations.**
+**The agent MUST ALWAYS use the `n8n-cli` (n8n command line interface) for any N8N workflow automation operations.**
 
-The N8N MCP server is connected as a **local MCP endpoint**. The connection is configured via two environment variables in the OpenCode container:
+The n8n-cli is pre-installed globally and automatically configured with credentials from environment variables in the OpenCode container:
 - `N8N_API_URL` - Full URL to the N8N API (e.g. `http://192.168.0.177:5678`)
 - `N8N_API_KEY` - API key generated from N8N Settings > API > API Keys
 
-### Available N8N MCP tools
+### Available n8n-cli Commands
 
 #### Workflow Management
-- `n8n_search_workflows` - Search/list workflows (supports `query` and `limit` filters)
-- `n8n_get_workflow_details` - Get full details of a workflow by ID
-- `n8n_create_workflow` - Create a new workflow with nodes and connections
-- `n8n_update_workflow` - Update an existing workflow
-- `n8n_delete_workflow` - Delete a workflow
-- `n8n_activate_workflow` - Activate a workflow to enable execution
-- `n8n_deactivate_workflow` - Deactivate a workflow to disable execution
+```bash
+n8n workflow list                              # List all workflows
+n8n workflow list --format=json                # List workflows in JSON format
+n8n workflow export --workflow=<id>            # Export a workflow to JSON
+n8n workflow import --file=workflow.json       # Import workflow from JSON file
+n8n workflow activate --workflow=<id>          # Activate a workflow
+n8n workflow deactivate --workflow=<id>        # Deactivate a workflow
+n8n workflow delete --workflow=<id>            # Delete a workflow
+n8n workflow execute --workflow=<id>           # Execute a workflow
+n8n workflow get --workflow=<id>               # Get workflow details
+```
 
-#### Workflow Execution
-- `n8n_execute_workflow` - Execute a workflow with optional input data
-- `n8n_list_executions` - List workflow executions with optional filtering (by workflowId, status, limit, offset)
-- `n8n_get_execution` - Get details of a specific execution
-- `n8n_delete_execution` - Delete an execution record
+#### Execution Management
+```bash
+n8n execution list                             # List recent executions
+n8n execution list --workflow=<id>             # List executions for a specific workflow
+n8n execution get --execution=<id>             # Get execution details
+n8n execution delete --execution=<id>          # Delete an execution
+n8n execution retry --execution=<id>           # Retry a failed execution
+```
+
+#### Credential Management
+```bash
+n8n credentials list                           # List all credentials
+n8n credentials list --format=json             # List credentials in JSON format
+n8n credentials export --credential=<id>       # Export a credential
+n8n credentials import --file=cred.json        # Import a credential
+```
+
+#### Node and Data Management
+```bash
+n8n node list                                  # List available nodes
+n8n node list --format=json                    # List nodes in JSON format
+```
 
 ### How to use
 
-**Search workflows:**
-```
-n8n_search_workflows(query="keyword", limit=10)
-```
-
-**Get workflow details (always do this before executing to understand inputs):**
-```
-n8n_get_workflow_details(workflowId="abc123")
+**List all workflows:**
+```bash
+n8n workflow list
+n8n workflow list --format=json | jq
 ```
 
-**Create a workflow:**
-```
-n8n_create_workflow(
-  name="My Workflow",
-  nodes=[...],
-  connections={...},
-  active=true,
-  tags=["production"]
-)
+**Get workflow details:**
+```bash
+n8n workflow get --workflow=abc123
 ```
 
-**Update a workflow:**
+**Export a workflow to JSON:**
+```bash
+n8n workflow export --workflow=abc123 > workflow.json
 ```
-n8n_update_workflow(
-  workflowId="abc123",
-  name="Updated Name",
-  active=true
-)
+
+**Import a workflow from JSON:**
+```bash
+n8n workflow import --file=workflow.json
+```
+
+**Activate a workflow:**
+```bash
+n8n workflow activate --workflow=abc123
+```
+
+**Deactivate a workflow:**
+```bash
+n8n workflow deactivate --workflow=abc123
 ```
 
 **Execute a workflow:**
-```
-n8n_execute_workflow(
-  workflowId="abc123",
-  inputs={...}
-)
+```bash
+n8n workflow execute --workflow=abc123
 ```
 
-**List executions:**
-```
-n8n_list_executions(workflowId="abc123", status="success", limit=20)
+**List executions for a workflow:**
+```bash
+n8n execution list --workflow=abc123
 ```
 
 **Get execution details:**
-```
-n8n_get_execution(executionId="def456")
+```bash
+n8n execution get --execution=def456
 ```
 
-**Activate/Deactivate workflows:**
+**Delete an execution:**
+```bash
+n8n execution delete --execution=def456
 ```
-n8n_activate_workflow(workflowId="abc123")
-n8n_deactivate_workflow(workflowId="abc123")
+
+**List all available nodes:**
+```bash
+n8n node list
 ```
 
 ### Important rules
-- ALWAYS call `n8n_get_workflow_details` before `n8n_execute_workflow` to understand the expected input schema.
-- NEVER guess workflow IDs — always search first with `n8n_search_workflows`.
-- Use N8N MCP tools instead of direct HTTP calls to the N8N API.
-- For workflow creation/updates, ensure nodes and connections are properly structured according to N8N specifications.
+- Always use `n8n` commands through bash/terminal for all N8N operations.
+- For JSON output, use `--format=json` and pipe to `jq` for filtering and processing.
+- The `N8N_API_URL` and `N8N_API_KEY` environment variables must be set for n8n-cli to connect.
+- Use `n8n workflow get --workflow=<id>` to verify workflow details before executing.
+- For scripting, prefer JSON output format with `--format=json`.
 
 ## Portainer Access
 
