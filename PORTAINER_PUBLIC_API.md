@@ -19,7 +19,7 @@ La configuración se realiza automáticamente en `opencode.json`:
     "command": ["npx", "-y", "portainer-mcp-server"],
     "enabled": true,
     "environment": {
-      "PORTAINER_URL": "http://192.168.0.214:9000",
+      "PORTAINER_URL": "{env:PORTAINER_URL}",
       "PORTAINER_PAT": "{env:PORTAINER_PAT}",
       "PUBLIC_PORT": "3000"
     }
@@ -31,7 +31,7 @@ La configuración se realiza automáticamente en `opencode.json`:
 
 Asegúrate de que estas variables estén configuradas en tu entorno:
 
-- `PORTAINER_URL` - URL del servidor Portainer (default: `http://192.168.0.214:9000`)
+- `PORTAINER_URL` - URL del servidor Portainer (se obtiene de la variable de entorno `$PORTAINER_URL`)
 - `PORTAINER_PAT` - API Key/Token de Portainer (requerido)
 - `PUBLIC_PORT` - Puerto para la API pública (default: `3000`)
 

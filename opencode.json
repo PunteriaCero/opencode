@@ -10,7 +10,7 @@
       ],
       "enabled": false,
       "environment": {
-        "PORTAINER_URL": "http://192.168.0.214:9000",
+        "PORTAINER_URL": "{env:PORTAINER_URL}",
         "PORTAINER_PAT": "{env:PORTAINER_PAT}",
         "PUBLIC_PORT": "3000"
       }
