@@ -101,84 +101,129 @@ n8n_deactivate_workflow(workflowId="abc123")
 
 ## Portainer Access
 
-**The agent MUST ALWAYS use the Portainer CLI (`portainer-config-cli`) for any Docker/Portainer operations.** NEVER use direct curl/bash commands or MCP tools to access Portainer.
+**The agent MUST ALWAYS use the `portainerctl` CLI for any Docker/Portainer operations.** NEVER use direct curl/bash commands or MCP tools to access Portainer.
 
-The Portainer CLI is pre-installed globally and automatically configured with the `PORTAINER_URL` and `PORTAINER_PAT` environment variables.
+The official Portainer CLI (`portainerctl`) is pre-installed globally and automatically configured with the `PORTAINERCTL_URL` and `PORTAINERCTL_TOKEN` environment variables (mapped from `PORTAINER_URL` and `PORTAINER_PAT`).
+
+### Configuration
+
+The environment variables are automatically mapped:
+```bash
+export PORTAINERCTL_URL=$PORTAINER_URL       # Portainer API URL
+export PORTAINERCTL_TOKEN=$PORTAINER_PAT     # Portainer API token
+```
 
 ### Available Portainer CLI Commands
 
-**Environment & Endpoint Management:**
+**Environment Management:**
 ```bash
-portainer-config endpoint list              # List all Docker environments/endpoints
-portainer-config endpoint inspect <id>      # Get details of a specific endpoint
+portainerctl env list                        # List all Docker environments
+portainerctl env list -o json                # List environments in JSON format
+portainerctl env get <id>                    # Get details of a specific environment
+portainerctl env snapshot <id>               # Take a snapshot of an environment
 ```
 
 **Container Management:**
 ```bash
-portainer-config container list [options]   # List containers across endpoints
-portainer-config container inspect <id>     # Get detailed container info
-portainer-config container start <id>       # Start a stopped container
-portainer-config container stop <id>        # Stop a running container
-portainer-config container restart <id>     # Restart a container
-portainer-config container logs <id>        # View container logs
+portainerctl container list --env 2          # List containers in environment 2
+portainerctl container list --env 2 --all    # List all containers including stopped
+portainerctl container inspect <id> --env 2  # Get detailed container info
+portainerctl container logs <id> --env 2     # View container logs
+portainerctl container start <id> --env 2    # Start a container
+portainerctl container stop <id> --env 2     # Stop a container
+portainerctl container restart <id> --env 2  # Restart a container
+portainerctl container kill <id> --env 2     # Kill a container
+portainerctl container remove <id> --env 2   # Remove a container
+portainerctl container stats <id> --env 2    # Get container statistics
 ```
 
 **Image Management:**
 ```bash
-portainer-config image list [options]       # List Docker images
-portainer-config image inspect <id>         # Get image details
-portainer-config image pull <image>         # Pull a Docker image
-portainer-config image delete <id>          # Delete an image
+portainerctl image list --env 2              # List Docker images
+portainerctl image list --env 2 -o json      # List images in JSON format
+portainerctl image inspect <id> --env 2      # Get image details
+portainerctl image pull --env 2 --image nginx:latest  # Pull a Docker image
+portainerctl image remove <id> --env 2       # Remove an image
 ```
 
 **Stack Management:**
 ```bash
-portainer-config stack list                 # List Docker Compose stacks
-portainer-config stack inspect <id>         # Get stack details
-portainer-config stack deploy <file>        # Deploy a new stack
-portainer-config stack remove <id>          # Remove a stack
-```
-
-**Network Management:**
-```bash
-portainer-config network list               # List Docker networks
-portainer-config network inspect <id>       # Get network details
+portainerctl stack list                      # List all stacks
+portainerctl stack list --env 2              # List stacks in environment 2
+portainerctl stack get <id>                  # Get stack details
+portainerctl stack file <id>                 # Get stack compose file
+portainerctl stack deploy-compose --name myapp --env 2 --file docker-compose.yml  # Deploy stack
+portainerctl stack start <id>                # Start a stack
+portainerctl stack stop <id>                 # Stop a stack
+portainerctl stack redeploy <id>             # Redeploy stack (pull latest from Git)
+portainerctl stack delete <id> --env 2       # Delete a stack
 ```
 
 **Volume Management:**
 ```bash
-portainer-config volume list                # List Docker volumes
-portainer-config volume inspect <id>        # Get volume details
+portainerctl volume list --env 2             # List volumes
+portainerctl volume inspect <name> --env 2   # Get volume details
+portainerctl volume create myvolume --env 2  # Create a volume
+portainerctl volume remove myvolume --env 2  # Remove a volume
+```
+
+**Network Management:**
+```bash
+portainerctl network list --env 2            # List networks
+portainerctl network inspect <id> --env 2    # Get network details
+portainerctl network create mynet --env 2 --driver bridge  # Create a network
+portainerctl network remove <id> --env 2     # Remove a network
+```
+
+### Output Formats
+
+All commands support output formatting:
+```bash
+portainerctl container list --env 2          # Default: human-readable table
+portainerctl container list --env 2 -o json  # JSON output (pipe to jq for filtering)
+portainerctl container list --env 2 -o yaml  # YAML output
 ```
 
 ### Usage Examples
 
-**List all containers in the local environment:**
+**List containers in local Docker environment (env 2):**
 ```bash
-portainer-config container list --endpoint 3
+portainerctl container list --env 2
 ```
 
-**Get container logs:**
+**Get container logs with timestamps:**
 ```bash
-portainer-config container logs <container_id>
+portainerctl container logs <container_id> --env 2 --timestamps
 ```
 
-**List all stacks:**
+**Find running container matching a name pattern:**
 ```bash
-portainer-config stack list
+portainerctl container list --env 2 -o json | jq '.[] | select(.names[] | contains("opencode"))'
 ```
 
-**View help for any command:**
+**Restart a specific container:**
 ```bash
-portainer-config <command> --help
+portainerctl container restart <container_id> --env 2
+```
+
+**Deploy a Docker Compose stack:**
+```bash
+portainerctl stack deploy-compose --name myapp --env 2 --file docker-compose.yml
+```
+
+**Get stack status:**
+```bash
+portainerctl stack image-status <stack_id>
 ```
 
 ### Important Rules
 
-- Always use `portainer-config` for all Docker/container operations
-- The CLI is pre-configured with authentication credentials from environment variables
-- For complex operations, chain multiple commands using bash pipes and standard text processing tools
-- Use `--help` flag on any command for detailed documentation
+- Always use `portainerctl` for all Docker/container operations
+- Provide the `--env <id>` flag to specify the target environment (typically 2 for local Docker)
+- Use `-o json` for scripting and data processing with `jq`
+- View help for any command: `portainerctl <command> --help`
+- API token is automatically configured from `PORTAINER_PAT` environment variable
+- Never attempt to use local Docker commands (`docker ps`, `docker run`, etc.) — always use `portainerctl`
 
 ## GitHub Authentication
 
@@ -211,9 +256,16 @@ cd /root/.config/opencode && git -c credential.helper='!echo "username=git"; ech
 
 ## Restart OpenCode after config changes
 
-After successfully pushing changes to GitHub from `/root/.config/opencode`, you MUST restart the OpenCode container via Portainer MCP using the `restart_container` tool with:
-- environmentId: 3
-- containerId: opencode
+After successfully pushing changes to GitHub from `/root/.config/opencode`, you MUST restart the OpenCode container via Portainer CLI:
+
+```bash
+portainerctl container restart <opencode_container_id> --env 2
+```
+
+To find the container ID:
+```bash
+portainerctl container list --env 2 -o json | jq '.[] | select(.names[] | contains("opencode")) | .id'
+```
 
 ## Push changes to GitHub (General Rule)
 
