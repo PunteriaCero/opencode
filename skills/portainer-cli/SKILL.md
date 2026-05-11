@@ -1,3 +1,13 @@
+---
+name: portainer-cli
+description: Use Portainer CLI (portainerctl) for Docker/container operations like managing containers, images, networks, volumes, and stacks. Load this skill whenever the user asks to interact with Docker containers, images, stacks, or any container operations.
+license: MIT
+compatibility: opencode
+metadata:
+  audience: developers
+  workflow: docker
+---
+
 # Portainer CLI Skill
 
 ## Overview

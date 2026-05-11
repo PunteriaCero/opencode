@@ -1,3 +1,13 @@
+---
+name: opencode-config
+description: Manage OpenCode configuration files and deployment procedures, including auto-commit workflows and container restarts. Load this skill when modifying OpenCode configuration.
+license: MIT
+compatibility: opencode
+metadata:
+  audience: developers
+  workflow: opencode
+---
+
 # OpenCode Configuration Management Skill
 
 ## Overview

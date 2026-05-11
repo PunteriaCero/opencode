@@ -1,3 +1,13 @@
+---
+name: github-ops
+description: Use git with GITHUB_PAT token for GitHub push operations, authentication, and repository management. Load this skill for pushing code changes to GitHub repositories.
+license: MIT
+compatibility: opencode
+metadata:
+  audience: developers
+  workflow: github
+---
+
 # GitHub Operations Skill
 
 ## Overview
