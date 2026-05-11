@@ -125,90 +125,90 @@ portainerctl env snapshot <id>               # Take a snapshot of an environment
 
 **Container Management:**
 ```bash
-portainerctl container list --env 2          # List containers in environment 2
-portainerctl container list --env 2 --all    # List all containers including stopped
-portainerctl container inspect <id> --env 2  # Get detailed container info
-portainerctl container logs <id> --env 2     # View container logs
-portainerctl container start <id> --env 2    # Start a container
-portainerctl container stop <id> --env 2     # Stop a container
-portainerctl container restart <id> --env 2  # Restart a container
-portainerctl container kill <id> --env 2     # Kill a container
-portainerctl container remove <id> --env 2   # Remove a container
-portainerctl container stats <id> --env 2    # Get container statistics
+portainerctl container list --env 3          # List containers in environment 3 (local Docker)
+portainerctl container list --env 3 --all    # List all containers including stopped
+portainerctl container inspect <id> --env 3  # Get detailed container info
+portainerctl container logs <id> --env 3     # View container logs
+portainerctl container start <id> --env 3    # Start a container
+portainerctl container stop <id> --env 3     # Stop a container
+portainerctl container restart <id> --env 3  # Restart a container
+portainerctl container kill <id> --env 3     # Kill a container
+portainerctl container remove <id> --env 3   # Remove a container
+portainerctl container stats <id> --env 3    # Get container statistics
 ```
 
 **Image Management:**
 ```bash
-portainerctl image list --env 2              # List Docker images
-portainerctl image list --env 2 -o json      # List images in JSON format
-portainerctl image inspect <id> --env 2      # Get image details
-portainerctl image pull --env 2 --image nginx:latest  # Pull a Docker image
-portainerctl image remove <id> --env 2       # Remove an image
+portainerctl image list --env 3              # List Docker images
+portainerctl image list --env 3 -o json      # List images in JSON format
+portainerctl image inspect <id> --env 3      # Get image details
+portainerctl image pull --env 3 --image nginx:latest  # Pull a Docker image
+portainerctl image remove <id> --env 3       # Remove an image
 ```
 
 **Stack Management:**
 ```bash
 portainerctl stack list                      # List all stacks
-portainerctl stack list --env 2              # List stacks in environment 2
+portainerctl stack list --env 3              # List stacks in environment 3
 portainerctl stack get <id>                  # Get stack details
 portainerctl stack file <id>                 # Get stack compose file
-portainerctl stack deploy-compose --name myapp --env 2 --file docker-compose.yml  # Deploy stack
+portainerctl stack deploy-compose --name myapp --env 3 --file docker-compose.yml  # Deploy stack
 portainerctl stack start <id>                # Start a stack
 portainerctl stack stop <id>                 # Stop a stack
 portainerctl stack redeploy <id>             # Redeploy stack (pull latest from Git)
-portainerctl stack delete <id> --env 2       # Delete a stack
+portainerctl stack delete <id> --env 3       # Delete a stack
 ```
 
 **Volume Management:**
 ```bash
-portainerctl volume list --env 2             # List volumes
-portainerctl volume inspect <name> --env 2   # Get volume details
-portainerctl volume create myvolume --env 2  # Create a volume
-portainerctl volume remove myvolume --env 2  # Remove a volume
+portainerctl volume list --env 3             # List volumes
+portainerctl volume inspect <name> --env 3   # Get volume details
+portainerctl volume create myvolume --env 3  # Create a volume
+portainerctl volume remove myvolume --env 3  # Remove a volume
 ```
 
 **Network Management:**
 ```bash
-portainerctl network list --env 2            # List networks
-portainerctl network inspect <id> --env 2    # Get network details
-portainerctl network create mynet --env 2 --driver bridge  # Create a network
-portainerctl network remove <id> --env 2     # Remove a network
+portainerctl network list --env 3            # List networks
+portainerctl network inspect <id> --env 3    # Get network details
+portainerctl network create mynet --env 3 --driver bridge  # Create a network
+portainerctl network remove <id> --env 3     # Remove a network
 ```
 
 ### Output Formats
 
 All commands support output formatting:
 ```bash
-portainerctl container list --env 2          # Default: human-readable table
-portainerctl container list --env 2 -o json  # JSON output (pipe to jq for filtering)
-portainerctl container list --env 2 -o yaml  # YAML output
+portainerctl container list --env 3          # Default: human-readable table
+portainerctl container list --env 3 -o json  # JSON output (pipe to jq for filtering)
+portainerctl container list --env 3 -o yaml  # YAML output
 ```
 
 ### Usage Examples
 
-**List containers in local Docker environment (env 2):**
+**List containers in local Docker environment (env 3):**
 ```bash
-portainerctl container list --env 2
+portainerctl container list --env 3
 ```
 
 **Get container logs with timestamps:**
 ```bash
-portainerctl container logs <container_id> --env 2 --timestamps
+portainerctl container logs <container_id> --env 3 --timestamps
 ```
 
 **Find running container matching a name pattern:**
 ```bash
-portainerctl container list --env 2 -o json | jq '.[] | select(.names[] | contains("opencode"))'
+portainerctl container list --env 3 -o json | jq '.[] | select(.name | contains("opencode"))'
 ```
 
-**Restart a specific container:**
+**Restart a specific container by name:**
 ```bash
-portainerctl container restart <container_id> --env 2
+portainerctl container restart router-api --env 3
 ```
 
 **Deploy a Docker Compose stack:**
 ```bash
-portainerctl stack deploy-compose --name myapp --env 2 --file docker-compose.yml
+portainerctl stack deploy-compose --name myapp --env 3 --file docker-compose.yml
 ```
 
 **Get stack status:**
@@ -219,11 +219,12 @@ portainerctl stack image-status <stack_id>
 ### Important Rules
 
 - Always use `portainerctl` for all Docker/container operations
-- Provide the `--env <id>` flag to specify the target environment (typically 2 for local Docker)
+- For local Docker operations, use `--env 3` (the local Docker endpoint in this setup)
 - Use `-o json` for scripting and data processing with `jq`
 - View help for any command: `portainerctl <command> --help`
 - API token is automatically configured from `PORTAINER_PAT` environment variable
 - Never attempt to use local Docker commands (`docker ps`, `docker run`, etc.) — always use `portainerctl`
+- Container names in the JSON output include leading slashes (e.g., `/router-api`)
 
 ## GitHub Authentication
 
@@ -259,12 +260,13 @@ cd /root/.config/opencode && git -c credential.helper='!echo "username=git"; ech
 After successfully pushing changes to GitHub from `/root/.config/opencode`, you MUST restart the OpenCode container via Portainer CLI:
 
 ```bash
-portainerctl container restart <opencode_container_id> --env 2
+portainerctl container restart opencode --env 3
 ```
 
-To find the container ID:
+Or to find the container ID and restart by ID:
 ```bash
-portainerctl container list --env 2 -o json | jq '.[] | select(.names[] | contains("opencode")) | .id'
+portainerctl container list --env 3 -o json | jq '.[] | select(.name | contains("opencode")) | .id'
+portainerctl container restart <container_id> --env 3
 ```
 
 ## Push changes to GitHub (General Rule)
