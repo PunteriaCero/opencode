@@ -50,11 +50,15 @@ This will show you the available N8N variables. Look for:
 
 **Before running ANY n8n command, export the variables:**
 ```bash
-# From N8N_API_URL, extract just the host
-export N8N_HOST="http://192.168.0.177:5678"
+# Export N8N_HOST - it's already available in your environment
+export N8N_HOST="$N8N_HOST"
 
-# Use the N8N_API_KEY token directly
-export N8N_API_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+# Export N8N_API_KEY - it's already available in your environment  
+export N8N_API_KEY="$N8N_API_KEY"
+
+# Verify both are set
+echo "N8N_HOST: $N8N_HOST"
+echo "N8N_API_KEY: ${N8N_API_KEY:0:20}..."  # Show only first 20 chars for security
 ```
 
 ### Step 3: Verify Connection
@@ -69,14 +73,14 @@ n8n health              # Verify n8n instance is running
 ❌ **WRONG**: Don't use `N8N_API_URL` directly - it includes `/api/v1` path
 ```bash
 # This will fail:
-export N8N_HOST="$N8N_API_URL"  # Don't do this!
+export N8N_HOST="$N8N_API_URL"  # N8N_API_URL includes /api/v1 - Don't do this!
 ```
 
-✅ **CORRECT**: Extract just the base URL
+✅ **CORRECT**: Use N8N_HOST which already has the correct format
 ```bash
-# Extract from N8N_API_URL (remove /api/v1)
-export N8N_HOST="http://192.168.0.177:5678"
-export N8N_API_KEY="$N8N_API_KEY"  # Use the token as-is
+# N8N_HOST is already set to the correct value: http://192.168.0.177:5678
+export N8N_HOST="$N8N_HOST"
+export N8N_API_KEY="$N8N_API_KEY"
 ```
 
 ### Connection Troubleshooting
@@ -137,9 +141,9 @@ n8n health                                      # Check n8n instance health
 # Step 1: Check what's available
 env | grep -i n8n
 
-# Step 2: Export N8N_HOST and N8N_API_KEY
-export N8N_HOST="http://192.168.0.177:5678"      # From N8N_API_URL, remove /api/v1
-export N8N_API_KEY="your-token-from-env"          # Copy from N8N_API_KEY environment variable
+# Step 2: Export N8N_HOST and N8N_API_KEY (they are already in your environment)
+export N8N_HOST="$N8N_HOST"        # Currently: http://192.168.0.177:5678
+export N8N_API_KEY="$N8N_API_KEY"  # Your API token
 
 # Step 3: Verify it works
 n8n auth status
@@ -211,7 +215,7 @@ n8n executions retry <execution-id>
 
 1. **ALWAYS set environment variables first**: Before running ANY n8n command, ensure `N8N_HOST` and `N8N_API_KEY` are exported
 2. **Extract from existing environment**: Run `env | grep -i n8n` to find available credentials
-3. **Use correct host format**: `N8N_HOST` should be just the base URL (e.g., `http://192.168.0.177:5678`), NOT including `/api/v1`
+3. **Use correct host format**: `N8N_HOST` should be the base URL. Your current value is `http://192.168.0.177:5678` - use this via `export N8N_HOST="$N8N_HOST"`
 4. **Verify connection before proceeding**: Use `n8n auth status` to confirm connectivity
 5. **Verify workflow details before executing**: Use `n8n workflows get <id>` to understand inputs and outputs
 6. **Use JSON format for scripting**: Use `--json` flag and pipe to `jq` for filtering and processing
@@ -257,9 +261,9 @@ n8n executions list --json | jq '.data[] | {id, status, startTime, endTime}'
 # 1. Check if environment variables are set
 env | grep -i n8n
 
-# 2. If missing, extract from existing variables
-export N8N_HOST="http://192.168.0.177:5678"
-export N8N_API_KEY="your-api-key"
+# 2. Export the variables (they are already in your environment)
+export N8N_HOST="$N8N_HOST"
+export N8N_API_KEY="$N8N_API_KEY"
 
 # 3. Verify connection
 n8n auth status
@@ -302,9 +306,9 @@ n8n workflows list          # Correct
 # Check environment variables are set
 env | grep -i n8n
 
-# Export them
-export N8N_HOST="http://192.168.0.177:5678"
-export N8N_API_KEY="your-token"
+# Export them (they are already in your environment)
+export N8N_HOST="$N8N_HOST"
+export N8N_API_KEY="$N8N_API_KEY"
 
 # Run all checks at once
 n8n auth status && n8n health && n8n workflows list
@@ -319,8 +323,8 @@ n8n auth status && n8n health && n8n workflows list
 
 2. ✅ Export required variables
    ```bash
-   export N8N_HOST="http://192.168.0.177:5678"
-   export N8N_API_KEY="eyJhbGciOi..."
+   export N8N_HOST="$N8N_HOST"
+   export N8N_API_KEY="$N8N_API_KEY"
    ```
 
 3. ✅ Verify connection
