@@ -4,17 +4,11 @@
 
 **CRITICAL RULE: The agent MUST NEVER attempt to install, use, or execute Docker locally. Docker is NOT available in the OpenCode environment.**
 
-**For ANY Docker operations (containers, images, networks, volumes, stacks), the agent MUST use the Portainer MCP tools instead.**
+**For ANY Docker operations (containers, images, networks, volumes, stacks), the agent MUST use the Portainer CLI (`portainer-config-cli`) instead.**
 
-Available Portainer MCP tools:
-- Container management: `list_containers`, `inspect_container`, `start_container`, `stop_container`, `restart_container`
-- Image management: `list_images`, `pull_image`, `delete_image`, `portainer_list_unused_images`, `portainer_cleanup_unused_images`
-- Network management: `list_networks`
-- Volume management: `list_volumes`
-- Stack management: `list_stacks`, `inspect_stack`, `get_stack_file`
-- Container logs: `get_container_logs`
+The Portainer CLI is pre-installed globally and automatically configured with credentials from environment variables (`PORTAINER_URL` and `PORTAINER_PAT`).
 
-**Why:** All Docker operations are routed through Portainer, which provides secure, centralized management with authentication and auditability. This is the single source of truth for container infrastructure.
+**Why:** All Docker operations are routed through Portainer CLI, which provides secure, centralized management with authentication and auditability. This is the single source of truth for container infrastructure.
 
 ---
 
@@ -107,46 +101,84 @@ n8n_deactivate_workflow(workflowId="abc123")
 
 ## Portainer Access
 
-**The agent MUST ALWAYS use the Portainer MCP tools for any Docker/Portainer operations.** NEVER use direct curl/bash commands to access Portainer.
+**The agent MUST ALWAYS use the Portainer CLI (`portainer-config-cli`) for any Docker/Portainer operations.** NEVER use direct curl/bash commands or MCP tools to access Portainer.
 
-Available Portainer MCP tools:
-- `list_environments` - List all Portainer environments
-- `list_containers` - List containers in an environment
-- `inspect_container` - Get detailed container info
-- `get_container_logs` - Get container logs
-- `start_container` - Start a stopped container
-- `stop_container` - Stop a running container
-- `restart_container` - Restart a container
-- `pull_image` - Pull a Docker image
-- `delete_image` - Delete a Docker image
-- `recreate_container` - Recreate a container with updated image
-- `list_stacks` - List all stacks
-- `inspect_stack` - Get stack details
-- `get_stack_file` - Get docker-compose file content
-- `list_images` - List Docker images
-- `list_networks` - List Docker networks
-- `list_volumes` - List Docker volumes
+The Portainer CLI is pre-installed globally and automatically configured with the `PORTAINER_URL` and `PORTAINER_PAT` environment variables.
 
-### New MCP Tools for Image Management
+### Available Portainer CLI Commands
 
-Two new MCP tools have been added for managing unused Docker images:
-
-- `portainer_list_unused_images` - List Docker images not used by any container (dangling images)
-- `portainer_cleanup_unused_images` - Delete all unused Docker images with optional force flag
-
-**Usage:**
-
-List unused images:
-```
-portainer_list_unused_images(environmentId=1)
+**Environment & Endpoint Management:**
+```bash
+portainer-config endpoint list              # List all Docker environments/endpoints
+portainer-config endpoint inspect <id>      # Get details of a specific endpoint
 ```
 
-Clean up unused images:
-```
-portainer_cleanup_unused_images(environmentId=1, force=false)
+**Container Management:**
+```bash
+portainer-config container list [options]   # List containers across endpoints
+portainer-config container inspect <id>     # Get detailed container info
+portainer-config container start <id>       # Start a stopped container
+portainer-config container stop <id>        # Stop a running container
+portainer-config container restart <id>     # Restart a container
+portainer-config container logs <id>        # View container logs
 ```
 
-**Note:** The Portainer MCP Server also exposes public HTTP endpoints for external CI/CD pipelines and webhooks (no authentication required). See PORTAINER_PUBLIC_API.md for integration with external systems.
+**Image Management:**
+```bash
+portainer-config image list [options]       # List Docker images
+portainer-config image inspect <id>         # Get image details
+portainer-config image pull <image>         # Pull a Docker image
+portainer-config image delete <id>          # Delete an image
+```
+
+**Stack Management:**
+```bash
+portainer-config stack list                 # List Docker Compose stacks
+portainer-config stack inspect <id>         # Get stack details
+portainer-config stack deploy <file>        # Deploy a new stack
+portainer-config stack remove <id>          # Remove a stack
+```
+
+**Network Management:**
+```bash
+portainer-config network list               # List Docker networks
+portainer-config network inspect <id>       # Get network details
+```
+
+**Volume Management:**
+```bash
+portainer-config volume list                # List Docker volumes
+portainer-config volume inspect <id>        # Get volume details
+```
+
+### Usage Examples
+
+**List all containers in the local environment:**
+```bash
+portainer-config container list --endpoint 3
+```
+
+**Get container logs:**
+```bash
+portainer-config container logs <container_id>
+```
+
+**List all stacks:**
+```bash
+portainer-config stack list
+```
+
+**View help for any command:**
+```bash
+portainer-config <command> --help
+```
+
+### Important Rules
+
+- Always use `portainer-config` for all Docker/container operations
+- The CLI is pre-configured with authentication credentials from environment variables
+- For complex operations, chain multiple commands using bash pipes and standard text processing tools
+- Use `--help` flag on any command for detailed documentation
 
 ## GitHub Authentication
 
