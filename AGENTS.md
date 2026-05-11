@@ -64,6 +64,34 @@ skill load opencode-config
 
 ---
 
+## Seguridad en Terminal: Variables de Entorno
+
+**REGLA CRITICA: El agente NUNCA debe exponer el valor de variables de entorno en la terminal o shell.**
+
+### Reglas obligatorias
+
+- **NUNCA** imprimir ni mostrar el valor de una variable de entorno con comandos como `echo $VAR`, `printenv VAR`, `env | grep VAR`, ni similares.
+- Para verificar si una variable tiene un valor cargado, usar lógica que cuente caracteres o evalúe longitud, sin exponer el contenido:
+  ```bash
+  # Correcto: verificar si la variable tiene valor
+  echo "${#MI_VARIABLE} caracteres cargados"
+
+  # Incorrecto: expone el valor
+  echo "$MI_VARIABLE"
+  ```
+- Para autenticar peticiones cURL u otras herramientas, referenciar la variable directamente sin imprimirla:
+  ```bash
+  # Correcto: la clave no queda expuesta en logs ni salida
+  curl -H "Authorization: Bearer $API_TOKEN" https://api.example.com
+
+  # Incorrecto: expone la clave
+  echo "Token: $API_TOKEN"
+  curl -H "Authorization: Bearer <valor_copiado>"
+  ```
+- Esta regla aplica a TODAS las variables sensibles: tokens, contraseñas, claves API, PATs, etc.
+
+---
+
 ## Creating Skills
 
 **When asked to create a new SKILL, ALWAYS load the `create-skill` skill first.**

@@ -65,6 +65,17 @@ portainerctl image pull --env 3 --image nginx:latest  # Pull a Docker image
 portainerctl image remove <id> --env 3       # Remove an image
 ```
 
+### Creating Containers
+
+`portainerctl` **does not have a `container create` or `container run` command**. To create new containers, use **stacks** (Docker Compose):
+
+```bash
+# Create a docker-compose.yml file, then deploy it as a stack
+portainerctl stack deploy-compose --name myapp --env 3 --file docker-compose.yml
+```
+
+This is the only supported way to create containers via `portainerctl`. Define the container configuration in a `docker-compose.yml` file and deploy it as a stack.
+
 ### Stack Management
 
 ```bash
@@ -147,6 +158,7 @@ portainerctl stack image-status <stack_id>
 
 ## Important Rules
 
+- `portainerctl` does NOT support `container create` or `container run` — use stacks instead
 - Always use `portainerctl` for all Docker/container operations
 - For local Docker operations, use `--env 3` (the local Docker endpoint in this setup)
 - Use `-o json` for scripting and data processing with `jq`
