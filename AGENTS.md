@@ -22,19 +22,30 @@ Available Portainer MCP tools:
 
 **The agent MUST ALWAYS use the N8N MCP tools for any N8N workflow automation operations.**
 
-The N8N MCP server is connected as a **native remote MCP endpoint**. The connection is configured via two environment variables in the OpenCode container:
-- `N8N_MCP_URL` - Full URL to the N8N MCP server (e.g. `http://192.168.0.177:5678/mcp-server/http`)
-- `N8N_API_KEY` - JWT API key generated from N8N Settings > API > API Keys (audience: `mcp-server-api`)
+The N8N MCP server is connected as a **local MCP endpoint**. The connection is configured via two environment variables in the OpenCode container:
+- `N8N_API_URL` - Full URL to the N8N API (e.g. `http://192.168.0.177:5678`)
+- `N8N_API_KEY` - API key generated from N8N Settings > API > API Keys
 
 ### Available N8N MCP tools
 
+#### Workflow Management
 - `n8n_search_workflows` - Search/list workflows (supports `query` and `limit` filters)
 - `n8n_get_workflow_details` - Get full details of a workflow by ID
-- `n8n_execute_workflow` - Execute a workflow by ID with inputs (chat, form, or webhook type)
+- `n8n_create_workflow` - Create a new workflow with nodes and connections
+- `n8n_update_workflow` - Update an existing workflow
+- `n8n_delete_workflow` - Delete a workflow
+- `n8n_activate_workflow` - Activate a workflow to enable execution
+- `n8n_deactivate_workflow` - Deactivate a workflow to disable execution
+
+#### Workflow Execution
+- `n8n_execute_workflow` - Execute a workflow with optional input data
+- `n8n_list_executions` - List workflow executions with optional filtering (by workflowId, status, limit, offset)
+- `n8n_get_execution` - Get details of a specific execution
+- `n8n_delete_execution` - Delete an execution record
 
 ### How to use
 
-**List workflows:**
+**Search workflows:**
 ```
 n8n_search_workflows(query="keyword", limit=10)
 ```
@@ -44,15 +55,55 @@ n8n_search_workflows(query="keyword", limit=10)
 n8n_get_workflow_details(workflowId="abc123")
 ```
 
+**Create a workflow:**
+```
+n8n_create_workflow(
+  name="My Workflow",
+  nodes=[...],
+  connections={...},
+  active=true,
+  tags=["production"]
+)
+```
+
+**Update a workflow:**
+```
+n8n_update_workflow(
+  workflowId="abc123",
+  name="Updated Name",
+  active=true
+)
+```
+
 **Execute a workflow:**
-- Chat-based: `inputs: { type: "chat", chatInput: "message" }`
-- Form-based: `inputs: { type: "form", formData: { key: "value" } }`
-- Webhook-based: `inputs: { type: "webhook", webhookData: { method: "POST", body: {}, headers: {}, query: {} } }`
+```
+n8n_execute_workflow(
+  workflowId="abc123",
+  inputs={...}
+)
+```
+
+**List executions:**
+```
+n8n_list_executions(workflowId="abc123", status="success", limit=20)
+```
+
+**Get execution details:**
+```
+n8n_get_execution(executionId="def456")
+```
+
+**Activate/Deactivate workflows:**
+```
+n8n_activate_workflow(workflowId="abc123")
+n8n_deactivate_workflow(workflowId="abc123")
+```
 
 ### Important rules
-- ALWAYS call `n8n_get_workflow_details` before `n8n_execute_workflow` to understand the expected input schema and workflow description.
+- ALWAYS call `n8n_get_workflow_details` before `n8n_execute_workflow` to understand the expected input schema.
 - NEVER guess workflow IDs — always search first with `n8n_search_workflows`.
 - Use N8N MCP tools instead of direct HTTP calls to the N8N API.
+- For workflow creation/updates, ensure nodes and connections are properly structured according to N8N specifications.
 
 ## Portainer Access
 

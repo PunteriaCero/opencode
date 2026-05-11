@@ -53,9 +53,8 @@
     "n8n": {
       "type": "local",
       "command": [
-        "npx",
-        "-y",
-        "@leonardsellem/n8n-mcp-server"
+        "node",
+        "/root/.config/opencode/mcp-servers/n8n-server.js"
       ],
       "enabled": true,
       "environment": {
