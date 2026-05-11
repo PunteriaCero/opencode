@@ -64,6 +64,18 @@ skill load opencode-config
 
 ---
 
+## Creating Skills
+
+**When asked to create a new SKILL, ALWAYS load the `create-skill` skill first.**
+
+```bash
+skill load create-skill
+```
+
+This skill provides the full format, naming rules, placement conventions, and frontmatter specification from the official OpenCode docs.
+
+---
+
 ## Summary of Skills
 
 | Skill | Purpose | Load Command |
@@ -72,6 +84,7 @@ skill load opencode-config
 | `n8n-cli` | N8N workflow automation operations | `skill load n8n-cli` |
 | `github-ops` | GitHub authentication and push operations | `skill load github-ops` |
 | `opencode-config` | OpenCode configuration management and deployment | `skill load opencode-config` |
+| `create-skill` | Create OpenCode skills following official format | `skill load create-skill` |
 
 ---
 
@@ -90,6 +103,7 @@ skill load <skill-name>
 - `github-ops` - GitHub operations and authentication
 - `opencode-config` - Configuration management and deployment
 - `gh-cli` - GitHub CLI operations (existing skill)
+- `create-skill` - Create OpenCode skills following official format
 
 ### Help
 
