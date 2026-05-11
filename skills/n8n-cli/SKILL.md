@@ -27,11 +27,16 @@ Load this skill when the user asks to:
 
 ## Authentication
 
-`n8n-cli` is already authenticated via environment variables:
-- `N8N_API_URL` - Full URL to the N8N API (e.g. `http://192.168.0.177:5678`)
+`n8n-cli` is authenticated via environment variables:
+- `N8N_HOST` - Base URL to the N8N instance (e.g. `http://192.168.0.177:5678`)
 - `N8N_API_KEY` - API key generated from N8N Settings > API > API Keys
 
-To verify: `n8n workflow list`
+If `N8N_HOST` is not set, ensure it's configured:
+```bash
+export N8N_HOST="http://192.168.0.177:5678"
+```
+
+To verify authentication: `n8n health`
 
 ## Key commands reference
 

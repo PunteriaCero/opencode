@@ -14,114 +14,23 @@ The Portainer CLI is pre-installed globally and automatically configured with cr
 
 ## N8N Access
 
-**The agent MUST ALWAYS use the `n8n-cli` (n8n command line interface) for any N8N workflow automation operations.**
+**The agent MUST ALWAYS use the `n8n-cli` skill for any N8N workflow automation operations.**
 
-The n8n-cli is pre-installed globally and automatically configured with credentials from environment variables in the OpenCode container:
-- `N8N_API_URL` - Full URL to the N8N API (e.g. `http://192.168.0.177:5678`)
-- `N8N_API_KEY` - API key generated from N8N Settings > API > API Keys
+Load the n8n-cli skill when working with N8N workflows, executions, or credentials. The skill provides comprehensive documentation and best practices for all n8n-cli operations.
 
-### Available n8n-cli Commands
-
-#### Workflow Management
 ```bash
-n8n workflow list                              # List all workflows
-n8n workflow list --format=json                # List workflows in JSON format
-n8n workflow export --workflow=<id>            # Export a workflow to JSON
-n8n workflow import --file=workflow.json       # Import workflow from JSON file
-n8n workflow activate --workflow=<id>          # Activate a workflow
-n8n workflow deactivate --workflow=<id>        # Deactivate a workflow
-n8n workflow delete --workflow=<id>            # Delete a workflow
-n8n workflow execute --workflow=<id>           # Execute a workflow
-n8n workflow get --workflow=<id>               # Get workflow details
+skill load n8n-cli
 ```
 
-#### Execution Management
-```bash
-n8n execution list                             # List recent executions
-n8n execution list --workflow=<id>             # List executions for a specific workflow
-n8n execution get --execution=<id>             # Get execution details
-n8n execution delete --execution=<id>          # Delete an execution
-n8n execution retry --execution=<id>           # Retry a failed execution
-```
+### Quick Reference
 
-#### Credential Management
-```bash
-n8n credentials list                           # List all credentials
-n8n credentials list --format=json             # List credentials in JSON format
-n8n credentials export --credential=<id>       # Export a credential
-n8n credentials import --file=cred.json        # Import a credential
-```
+- **List workflows**: `n8n workflows list`
+- **Get workflow details**: `n8n workflows get <id>`
+- **Execute workflow**: `n8n workflows execute <id>`
+- **List executions**: `n8n executions list`
+- **Manage credentials**: `n8n credentials list`
 
-#### Node and Data Management
-```bash
-n8n node list                                  # List available nodes
-n8n node list --format=json                    # List nodes in JSON format
-```
-
-### How to use
-
-**List all workflows:**
-```bash
-n8n workflow list
-n8n workflow list --format=json | jq
-```
-
-**Get workflow details:**
-```bash
-n8n workflow get --workflow=abc123
-```
-
-**Export a workflow to JSON:**
-```bash
-n8n workflow export --workflow=abc123 > workflow.json
-```
-
-**Import a workflow from JSON:**
-```bash
-n8n workflow import --file=workflow.json
-```
-
-**Activate a workflow:**
-```bash
-n8n workflow activate --workflow=abc123
-```
-
-**Deactivate a workflow:**
-```bash
-n8n workflow deactivate --workflow=abc123
-```
-
-**Execute a workflow:**
-```bash
-n8n workflow execute --workflow=abc123
-```
-
-**List executions for a workflow:**
-```bash
-n8n execution list --workflow=abc123
-```
-
-**Get execution details:**
-```bash
-n8n execution get --execution=def456
-```
-
-**Delete an execution:**
-```bash
-n8n execution delete --execution=def456
-```
-
-**List all available nodes:**
-```bash
-n8n node list
-```
-
-### Important rules
-- Always use `n8n` commands through bash/terminal for all N8N operations.
-- For JSON output, use `--format=json` and pipe to `jq` for filtering and processing.
-- The `N8N_API_URL` and `N8N_API_KEY` environment variables must be set for n8n-cli to connect.
-- Use `n8n workflow get --workflow=<id>` to verify workflow details before executing.
-- For scripting, prefer JSON output format with `--format=json`.
+For complete command reference, troubleshooting, and best practices, refer to the n8n-cli skill documentation.
 
 ## Portainer Access
 
