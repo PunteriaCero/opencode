@@ -164,9 +164,20 @@ curl -X POST \
 
 **Endpoint:** `POST /chat/findMessages/{instance}`
 
-Retrieve messages from a specific chat, optionally filtered.
+Retrieve messages from a specific chat, with optional filtering and pagination.
 
 ```bash
+# Get latest 5 messages from a chat
+curl -X POST \
+  "${EVOLUTION_API_URL}/chat/findMessages/${EVOLUTION_API_INSTANCE}" \
+  -H "apikey: ${EVOLUTION_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "chatId": "5491165002220@s.whatsapp.net",
+    "limit": 5
+  }'
+
+# Alternative: Get messages with advanced filtering
 curl -X POST \
   "${EVOLUTION_API_URL}/chat/findMessages/${EVOLUTION_API_INSTANCE}" \
   -H "apikey: ${EVOLUTION_API_KEY}" \
@@ -180,11 +191,48 @@ curl -X POST \
   }'
 ```
 
+**Query Parameters:**
+- `chatId`: Filter messages by chat ID (individual or group)
+- `limit`: Maximum number of messages to return
+- `where`: Advanced filtering object (alternative to simple parameters)
+
 **Chat ID Formats:**
 - **Individual chats:** `PHONENUMBER@s.whatsapp.net` (e.g., `5491165002220@s.whatsapp.net`)
 - **Group chats:** `GROUPID@g.us` (e.g., `120363012345678900@g.us`)
 
-**Response (200 OK):** Returns array of message objects.
+**Message Object Structure:**
+```json
+{
+  "id": "message-database-id",
+  "key": {
+    "id": "BAE594145F4C59B4",
+    "fromMe": false,
+    "remoteJid": "5491165002220@s.whatsapp.net"
+  },
+  "pushName": "Contact Name",
+  "messageType": "conversation",
+  "message": {
+    "conversation": "Message text content"
+  },
+  "messageTimestamp": 1778000210,
+  "source": "android",
+  "MessageUpdate": [{"status": "READ"}]
+}
+```
+
+**Message Types:**
+- `conversation`: Plain text messages
+- `imageMessage`: Image with optional caption
+- `videoMessage`: Video content
+- `audioMessage`: Audio/voice note (PTT for push-to-talk)
+- `documentMessage`: File attachments
+- `stickerMessage`: WhatsApp stickers
+- `reactionMessage`: Emoji reactions
+- `pinInChatMessage`: Pinned message notifications
+- `buttonMessage`: Interactive buttons
+- `listMessage`: List/menu selections
+
+**Response (200 OK):** Returns array of message objects with metadata.
 
 ---
 
@@ -536,6 +584,80 @@ Always:
 
 ---
 
+## Common Issues & Troubleshooting
+
+### WhatsApp Session Disconnected (401 Device Removed)
+
+**Error Response:**
+```json
+{
+  "disconnectionReasonCode": 401,
+  "disconnectionObject": "{\"error\":{\"data\":{\"tag\":\"stream:error\",\"attrs\":{\"code\":\"401\"},\"content\":[{\"tag\":\"conflict\",\"attrs\":{\"type\":\"device_removed\"}}]}"
+}
+```
+
+**Cause:** Your WhatsApp session was disconnected due to:
+- Logging in from another device
+- Session expiring or being removed
+- Device lost connection for extended period
+
+**Solution:**
+1. Reconnect the instance with a fresh QR code
+2. Scan the QR code from the phone device you want to use
+3. Wait 30-60 seconds for the connection to stabilize
+
+```bash
+# Trigger new QR code
+curl -X GET \
+  "${EVOLUTION_API_URL}/instance/connect/${EVOLUTION_API_INSTANCE}?number=5491165002220" \
+  -H "apikey: ${EVOLUTION_API_KEY}"
+```
+
+### Send Message Timeout
+
+**Error Response:**
+```json
+{
+  "status": 500,
+  "error": "Internal Server Error",
+  "response": {"message": "Timed Out"}
+}
+```
+
+**Cause:** Instance is in `connecting` state or has unstable connection.
+
+**Solution:**
+1. Check instance connection state
+2. Wait a few seconds and retry
+3. If issue persists, reconnect the instance
+
+```bash
+# Check connection state
+curl -X GET \
+  "${EVOLUTION_API_URL}/instance/connectionState/${EVOLUTION_API_INSTANCE}" \
+  -H "apikey: ${EVOLUTION_API_KEY}"
+```
+
+### Message Reading Returns Mixed Chat Data
+
+**Behavior:** When reading all messages, you may get messages from groups and individual chats mixed together.
+
+**Solution:** Use the `chatId` parameter to filter messages from a specific chat:
+
+```bash
+# Get messages ONLY from specific chat
+curl -X POST \
+  "${EVOLUTION_API_URL}/chat/findMessages/${EVOLUTION_API_INSTANCE}" \
+  -H "apikey: ${EVOLUTION_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "chatId": "5491165002220@s.whatsapp.net",
+    "limit": 5
+  }'
+```
+
+---
+
 ## HTTP Status Codes
 
 - `200 OK`: Request successful
@@ -595,31 +717,40 @@ Evolution API v2 supports integrations with:
 
 ```bash
 # 1. Verify API connection
-curl -X GET "${EVOLUTION_API_URL}/"
+curl -X GET "${EVOLUTION_API_URL}/" \
+  -H "Content-Type: application/json"
 
 # 2. Check instance state
 curl -X GET \
   "${EVOLUTION_API_URL}/instance/connectionState/${EVOLUTION_API_INSTANCE}" \
   -H "apikey: ${EVOLUTION_API_KEY}"
 
-# 3. List all chats
+# Expected response for connected instance:
+# {
+#   "instance": {
+#     "instanceName": "2220",
+#     "state": "open"
+#   }
+# }
+
+# 3. List all chats (returns 541+ chats with metadata)
 curl -X POST \
   "${EVOLUTION_API_URL}/chat/findChats/${EVOLUTION_API_INSTANCE}" \
   -H "apikey: ${EVOLUTION_API_KEY}" \
   -H "Content-Type: application/json"
 
-# 4. Read messages from specific chat (5491165002220)
+# 4. Read last 5 messages from specific individual chat
 curl -X POST \
   "${EVOLUTION_API_URL}/chat/findMessages/${EVOLUTION_API_INSTANCE}" \
   -H "apikey: ${EVOLUTION_API_KEY}" \
   -H "Content-Type: application/json" \
   -d '{
-    "where": {
-      "key": {
-        "remoteJid": "5491165002220@s.whatsapp.net"
-      }
-    }
+    "chatId": "5491165002220@s.whatsapp.net",
+    "limit": 5
   }'
+
+# Parse response to extract message content:
+# jq '.[] | {from: .pushName, text: .message.conversation, timestamp: .messageTimestamp}'
 
 # 5. Send a reply message
 curl -X POST \
@@ -628,7 +759,47 @@ curl -X POST \
   -H "Content-Type: application/json" \
   -d '{
     "number": "5491165002220",
-    "text": "Thanks for your message!"
+    "text": "Thanks for your message!",
+    "delay": 1000
   }'
+
+# 6. Read media message (image/video/audio)
+# Check message object for: imageMessage, videoMessage, audioMessage, etc.
+# Extract URL from message and download if needed
+```
+
+## Practical Tips
+
+### Extract Message Text by Type
+
+```bash
+# For text messages
+jq '.[] | select(.messageType == "conversation") | .message.conversation'
+
+# For image captions
+jq '.[] | select(.messageType == "imageMessage") | .message.imageMessage'
+
+# For audio messages (voice notes)
+jq '.[] | select(.messageType == "audioMessage") | .message.audioMessage.url'
+
+# For all messages with sender name and text
+jq '.[] | {sender: .pushName, type: .messageType, text: (.message.conversation // "media")}'
+```
+
+### Filter by Timestamp
+
+```bash
+# Get messages from last 24 hours
+# Convert Unix timestamp to seconds and compare
+YESTERDAY=$(($(date +%s) - 86400))
+
+curl -X POST \
+  "${EVOLUTION_API_URL}/chat/findMessages/${EVOLUTION_API_INSTANCE}" \
+  -H "apikey: ${EVOLUTION_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"chatId\": \"5491165002220@s.whatsapp.net\",
+    \"limit\": 100
+  }" | jq ".[] | select(.messageTimestamp > $YESTERDAY)"
 ```
 
