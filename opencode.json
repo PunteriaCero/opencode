@@ -1,0 +1,66 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "portainer": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "portainer-mcp-server"
+      ],
+      "enabled": false,
+      "environment": {
+        "PORTAINER_URL": "{env:PORTAINER_URL}",
+        "PORTAINER_PAT": "{env:PORTAINER_PAT}",
+        "PUBLIC_PORT": "3000"
+      }
+    },
+    "github": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "enabled": true,
+      "environment": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "{env:GITHUB_PAT}"
+      }
+    },
+    "gdrive": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@us-all/google-drive-mcp"
+      ],
+      "enabled": true,
+      "environment": {
+        "GOOGLE_CLIENT_ID": "{env:GDRIVE_CLIENT_ID}",
+        "GOOGLE_CLIENT_SECRET": "{env:GDRIVE_CLIENT_SECRET}",
+        "GOOGLE_REFRESH_TOKEN": "{env:GOOGLE_REFRESH_TOKEN}",
+        "GOOGLE_DRIVE_ALLOW_WRITE": "true"
+      }
+    },
+    "home-assistant": {
+      "type": "remote",
+      "url": "{env:HA_URL}/api/mcp",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer {env:HA_PAT}"
+      }
+    },
+    "n8n": {
+      "type": "local",
+      "command": [
+        "node",
+        "/root/.config/opencode/mcp-servers/n8n-server.js"
+      ],
+      "enabled": false,
+      "environment": {
+        "N8N_API_URL": "{env:N8N_API_URL}",
+        "N8N_API_KEY": "{env:N8N_API_KEY}"
+      }
+    }
+  }
+}
