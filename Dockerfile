@@ -16,6 +16,46 @@ RUN apk add --no-cache \
     ca-certificates \
     build-base
 
+# Install browser and multimedia dependencies (Alpine equivalents)
+# These are required for headless browser automation and audio/video support
+RUN apk add --no-cache \
+    nss \
+    xss \
+    alsa-lib \
+    gconf \
+    liberation-fonts \
+    libappindicator \
+    libindicator \
+    libgbm \
+    libxkbcommon \
+    libcups \
+    dbus \
+    expat \
+    fontconfig \
+    gdk-pixbuf \
+    mesa \
+    glib \
+    gtk+3.0 \
+    pango \
+    libx11 \
+    libxcb \
+    libxcomposite \
+    libxcursor \
+    libxdamage \
+    libxext \
+    libxfixes \
+    libxi \
+    libxinerama \
+    libxrandr \
+    libxrender \
+    libxshmfence \
+    libxtst \
+    xdg-utils \
+    libstdc++ \
+    libavcodec \
+    libavformat \
+    libavutil
+
 # Install GitHub CLI from binary release
 RUN curl -sSL https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_linux_amd64.tar.gz | \
     tar xz -C /usr/local/bin --strip-components=2 gh_2.92.0_linux_amd64/bin/gh
