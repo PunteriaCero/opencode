@@ -122,6 +122,88 @@ For read-only operations, you can use these MCP tools:
 - `github_create_issue` - Create issues programmatically
 - `github_list_commits` - List commits
 
+## Workflow Validation with actionlint
+
+Before pushing GitHub Actions workflows, validate them using **actionlint** - a static checker for GitHub Actions workflow files.
+
+### Installation
+
+```bash
+# Using Homebrew (macOS/Linux)
+brew install actionlint
+
+# Using go install
+go install github.com/rhysd/actionlint/cmd/actionlint@latest
+
+# Using Docker
+docker run --rm -v "$(pwd):/app" rhysd/actionlint:latest
+```
+
+### Usage
+
+```bash
+# Check all workflows in the repository
+actionlint
+
+# Check specific workflow file
+actionlint .github/workflows/ci.yml
+
+# Check with verbose output
+actionlint -verbose
+
+# Fix issues automatically (where possible)
+actionlint -format sarif
+```
+
+### What actionlint Validates
+
+- **Syntax errors** - Unexpected or missing keys in workflow files
+- **Type checking** - Strong type checking for `${{ }}` expressions
+- **Action inputs/outputs** - Verifies action inputs and outputs are correct
+- **Reusable workflows** - Validates reusable workflow calls
+- **Script injection** - Detects security vulnerabilities with untrusted inputs
+- **Hardcoded credentials** - Identifies exposed secrets
+- **Glob patterns** - Validates path and branch filters
+- **Job dependencies** - Checks `needs:` dependencies
+- **Runner labels** - Validates runner labels and availability
+- **Cron syntax** - Validates cron expressions in schedules
+- **Shell scripts** - Integrates shellcheck and pyflakes
+
+### Example: Validating Before Push
+
+```bash
+# Check workflows before committing
+actionlint
+
+# If validation passes
+git add .
+git commit -m "ci: add new workflow"
+git push
+
+# If validation fails
+# Fix the issues reported by actionlint
+# Then try again
+```
+
+### Common actionlint Errors
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `unexpected key` | Typo in YAML key | Check workflow syntax |
+| `is not defined` | Wrong action input name | Use correct input from action |
+| `not found` | Missing action version | Use valid action version |
+| `property not defined` | Accessing undefined variable | Use correct expression syntax |
+| `potentially untrusted` | Script injection risk | Pass to env var first |
+
+### Online Playground
+
+Try actionlint without installing:
+https://rhysd.github.io/actionlint/
+
+### Validation Script
+
+See the `validate-workflows.sh` script in this skill's directory for automated validation during CI/CD.
+
 ## Best Practices
 
 1. Use meaningful commit messages that describe the "why" not just the "what"
@@ -129,3 +211,8 @@ For read-only operations, you can use these MCP tools:
 3. Always verify changes with `git status` before pushing
 4. Use git branches for features and fixes
 5. Never force push to main or master branches without explicit approval
+6. **Always validate workflows with actionlint before pushing**
+7. Keep workflows DRY by using reusable workflows
+8. Document complex workflow logic with comments
+9. Use secrets properly and never hardcode credentials
+10. Test workflow changes on a branch before merging to main
