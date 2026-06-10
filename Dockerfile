@@ -14,7 +14,8 @@ RUN apk add --no-cache \
     ripgrep \
     openssh-client \
     ca-certificates \
-    build-base
+    build-base \
+    gcompat
 
 # Install browser and multimedia dependencies (Alpine equivalents)
 # These are required for headless browser automation and audio/video support
