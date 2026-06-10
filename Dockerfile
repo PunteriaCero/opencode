@@ -21,15 +21,13 @@ RUN apk add --no-cache \
 # These are required for headless browser automation and audio/video support
 RUN apk add --no-cache \
     nss \
-    xss \
+    libxscrnsaver \
     alsa-lib \
-    gconf \
-    liberation-fonts \
-    libappindicator \
-    libindicator \
-    libgbm \
+    font-liberation \
+    libayatana-appindicator \
+    mesa-gbm \
     libxkbcommon \
-    libcups \
+    cups-client \
     dbus \
     expat \
     fontconfig \
@@ -53,9 +51,7 @@ RUN apk add --no-cache \
     libxtst \
     xdg-utils \
     libstdc++ \
-    libavcodec \
-    libavformat \
-    libavutil
+    ffmpeg-libs
 
 # Install GitHub CLI from binary release
 RUN curl -sSL https://github.com/cli/cli/releases/download/v2.92.0/gh_2.92.0_linux_amd64.tar.gz | \
