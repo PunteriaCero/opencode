@@ -2,46 +2,76 @@
 set -e
 
 IMAGE="$1"
-CONTAINER_NAME="opencode"
 
 if [ -z "$IMAGE" ]; then
   echo "[ERROR] Usage: $0 <image>"
   exit 1
 fi
 
-echo "[INFO] Pulling image: ${IMAGE}"
-docker pull "${IMAGE}"
+echo "[INFO] Target image: ${IMAGE}"
 
-# --- Find compose file ---
-# 1st: use Docker label (most reliable)
-COMPOSE_FILE=$(docker inspect "${CONTAINER_NAME}" \
-  --format '{{index .Config.Labels "com.docker.compose.project.config_files"}}' 2>/dev/null || true)
+# --- Find the container (try common name variants) ---
+CONTAINER=""
+for name in opencode opencode_fix opencode-fix; do
+  if docker inspect "${name}" > /dev/null 2>&1; then
+    CONTAINER="${name}"
+    break
+  fi
+done
 
-# 2nd: search known CasaOS paths
-if [ -z "$COMPOSE_FILE" ] || [ ! -f "$COMPOSE_FILE" ]; then
-  echo "[INFO] Label not found, searching for compose file..."
-  COMPOSE_FILE=$(find /var/lib/casaos /DATA 2>/dev/null \
-    -name "docker-compose.yml" \
-    | xargs grep -l "opencode" 2>/dev/null \
-    | head -1 || true)
+if [ -z "${CONTAINER}" ]; then
+  # Last resort: find by image name
+  CONTAINER=$(docker ps --format '{{.Names}}' | grep -i opencode | head -1 || true)
 fi
 
-if [ -z "$COMPOSE_FILE" ] || [ ! -f "$COMPOSE_FILE" ]; then
-  echo "[ERROR] Could not find docker-compose.yml for '${CONTAINER_NAME}'"
-  echo "[INFO] Searched Docker labels and /var/lib/casaos, /DATA"
+if [ -z "${CONTAINER}" ]; then
+  echo "[ERROR] Could not find OpenCode container"
+  echo "[DEBUG] All running containers:"
+  docker ps --format 'table {{.Names}}\t{{.Image}}'
   exit 1
 fi
 
-echo "[INFO] Compose file: ${COMPOSE_FILE}"
-COMPOSE_DIR=$(dirname "${COMPOSE_FILE}")
+echo "[INFO] Found container: ${CONTAINER}"
 
-# Update image reference in compose file
-sed -i "s|image: ghcr\.io/.*|image: ${IMAGE}|" "${COMPOSE_FILE}"
-echo "[INFO] Updated image to: ${IMAGE}"
-grep "image:" "${COMPOSE_FILE}"
+# --- Extract current container config via docker inspect ---
+RESTART=$(docker inspect "${CONTAINER}" --format '{{.HostConfig.RestartPolicy.Name}}')
+NETWORK=$(docker inspect "${CONTAINER}" --format '{{.HostConfig.NetworkMode}}')
 
-# Recreate container
-cd "${COMPOSE_DIR}"
-docker compose up -d --force-recreate
+# Port mappings: "4096/tcp -> 0.0.0.0:4096" => -p 4096:4096
+PORT_ARGS=""
+while IFS= read -r line; do
+  [ -z "$line" ] && continue
+  container_port=$(echo "$line" | awk -F'/' '{print $1}')
+  host_port=$(echo "$line" | awk -F':' '{print $NF}')
+  PORT_ARGS="${PORT_ARGS} -p ${host_port}:${container_port}"
+done < <(docker port "${CONTAINER}" 2>/dev/null || true)
 
-echo "[INFO] Deploy complete"
+# Volume mounts: -v source:destination
+VOLUME_ARGS=$(docker inspect "${CONTAINER}" \
+  --format '{{range .Mounts}}-v {{.Source}}:{{.Destination}} {{end}}')
+
+echo "[INFO] Restart policy : ${RESTART}"
+echo "[INFO] Network        : ${NETWORK}"
+echo "[INFO] Ports          : ${PORT_ARGS}"
+echo "[INFO] Volumes        : ${VOLUME_ARGS}"
+
+# --- Pull new image ---
+echo "[INFO] Pulling ${IMAGE}..."
+docker pull "${IMAGE}"
+
+# --- Recreate container ---
+echo "[INFO] Stopping and removing '${CONTAINER}'..."
+docker stop "${CONTAINER}"
+docker rm "${CONTAINER}"
+
+echo "[INFO] Starting new container..."
+# shellcheck disable=SC2086
+docker run -d \
+  --name "${CONTAINER}" \
+  --restart "${RESTART}" \
+  --network "${NETWORK}" \
+  ${PORT_ARGS} \
+  ${VOLUME_ARGS} \
+  "${IMAGE}"
+
+echo "[INFO] Deploy complete — '${CONTAINER}' is running with ${IMAGE}"
