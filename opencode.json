@@ -1,5 +1,18 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "model": "github-copilot/claude-sonnet-4.6",
+  "provider": {
+    "github-copilot": {
+      "models": {
+        "claude-sonnet-4.6": {
+          "attachment": true
+        },
+        "claude-haiku-4.5": {
+          "attachment": true
+        }
+      }
+    }
+  },
   "mcp": {
     "portainer": {
       "type": "local",
