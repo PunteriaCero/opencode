@@ -62,5 +62,10 @@
         "N8N_API_KEY": "{env:N8N_API_KEY}"
       }
     }
+  },
+  "agent": {
+    "title": {
+      "model": "github-copilot/claude-haiku-4.5"
+    }
   }
 }
