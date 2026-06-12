@@ -68,3 +68,21 @@ RUN npm install -g n8n-cli
 RUN curl -sSL https://github.com/portainer/portainerctl/releases/download/v1.0.0/portainerctl_1.0.0_linux_amd64.tar.gz | \
     tar xz -C /usr/local/bin && \
     chmod +x /usr/local/bin/portainerctl
+
+# ═══════════════════════════════════════════════════════════════════════════
+# OPENCODE WEB SERVER CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════
+# Configure OpenCode to run as a headless web server with these defaults:
+# - Command: opencode serve
+# - Hostname: 0.0.0.0 (listen on all interfaces)
+# - Port: 4096 (default OpenCode web server port)
+#
+# These settings can be overridden by passing environment variables:
+# - OPENCODE_PORT: Override the port (default: 4096)
+# - OPENCODE_HOSTNAME: Override the hostname (default: 0.0.0.0)
+# ═══════════════════════════════════════════════════════════════════════════
+
+ENTRYPOINT ["opencode", "serve"]
+CMD ["--hostname", "0.0.0.0", "--port", "4096"]
+
+EXPOSE 4096

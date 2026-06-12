@@ -169,8 +169,7 @@ docker run -d \
   ${PORT_ARGS} \
   ${VOLUME_ARGS} \
   --env-file "$ENV_FILE" \
-  "${IMAGE}" \
-  opencode serve --hostname 0.0.0.0 --port 4096
+  "${IMAGE}"
 
 echo "[INFO] Deploy complete — '${CONTAINER}' is running with ${IMAGE}"
 
