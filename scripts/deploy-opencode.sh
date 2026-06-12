@@ -10,6 +10,70 @@ fi
 
 echo "[INFO] Target image: ${IMAGE}"
 
+# ═══════════════════════════════════════════════════════════════════════════
+# ENVIRONMENT VARIABLES INJECTION (Option B: .env file)
+# ═══════════════════════════════════════════════════════════════════════════
+# This script captures environment variables passed from GitHub Actions and
+# creates a temporary .env file to be injected into the Docker container.
+#
+# Variables available:
+# - From GitHub Actions "env:" section in workflow
+# - From GitHub secrets (${{ secrets.VAR_NAME }})
+# - From GitHub variables (${{ vars.VAR_NAME }})
+#
+# The .env file will be read by docker run using --env-file flag
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Create .env file with environment variables to inject into container
+# Filter out system/internal variables (GITHUB_*, RUNNER_*, PATH, HOME, etc.)
+ENV_FILE=".env.opencode"
+
+echo "[INFO] Creating environment file for container injection..."
+
+# Build the .env file - capture only relevant application variables
+# This approach filters out GitHub Actions internal variables and system vars
+{
+  # List all environment variables, filter out system ones
+  env | while IFS='=' read -r key value; do
+    # Skip GitHub Actions internal variables
+    [[ "$key" == GITHUB_* ]] && continue
+    [[ "$key" == RUNNER_* ]] && continue
+    [[ "$key" == ACTIONS_* ]] && continue
+    
+    # Skip standard system variables
+    [[ "$key" == "PATH" ]] && continue
+    [[ "$key" == "HOME" ]] && continue
+    [[ "$key" == "SHELL" ]] && continue
+    [[ "$key" == "USER" ]] && continue
+    [[ "$key" == "LOGNAME" ]] && continue
+    [[ "$key" == "PWD" ]] && continue
+    [[ "$key" == "LANG" ]] && continue
+    [[ "$key" == "LC_"* ]] && continue
+    
+    # Skip Docker-related system variables
+    [[ "$key" == "DOCKER_"* ]] && continue
+    [[ "$key" == "REGISTRY_OWNER_LOWER" ]] && continue
+    
+    # Export the variable to .env (preserving quotes for complex values)
+    echo "${key}=${value}"
+  done
+} > "$ENV_FILE" || true
+
+if [ -s "$ENV_FILE" ]; then
+  echo "[INFO] Environment variables to inject:"
+  grep -v "^$" "$ENV_FILE" | while IFS='=' read -r key value; do
+    # Show variable name but mask value for sensitive vars
+    if [[ "$key" == *"SECRET"* ]] || [[ "$key" == *"PASSWORD"* ]] || [[ "$key" == *"TOKEN"* ]] || [[ "$key" == *"KEY"* ]]; then
+      echo "  ✓ $key=***MASKED***"
+    else
+      echo "  ✓ $key=$value"
+    fi
+  done
+  echo "[INFO] Environment file created: $ENV_FILE"
+else
+  echo "[INFO] No additional environment variables to inject"
+fi
+
 # --- Find the container (try common name variants) ---
 CONTAINER=""
 for name in opencode opencode_fix opencode-fix; do
@@ -72,6 +136,20 @@ docker run -d \
   --network "${NETWORK}" \
   ${PORT_ARGS} \
   ${VOLUME_ARGS} \
+  --env-file "$ENV_FILE" \
   "${IMAGE}"
 
 echo "[INFO] Deploy complete — '${CONTAINER}' is running with ${IMAGE}"
+
+# ═══════════════════════════════════════════════════════════════════════════
+# CLEANUP: Remove temporary .env file
+# ═══════════════════════════════════════════════════════════════════════════
+# The .env file is no longer needed after container creation.
+# Docker has already injected the variables into the container.
+# Removing it reduces security risk of leaving secrets on disk.
+# ═══════════════════════════════════════════════════════════════════════════
+
+if [ -f "$ENV_FILE" ]; then
+  rm -f "$ENV_FILE"
+  echo "[INFO] Temporary environment file cleaned up"
+fi

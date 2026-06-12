@@ -73,8 +73,42 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Deploy via script
+        env:
+          # ═══════════════════════════════════════════════════════════════════
+          # ENVIRONMENT VARIABLES INJECTION (via .env file)
+          # ═══════════════════════════════════════════════════════════════════
+          #
+          # FLOW:
+          # 1. Define variables here using GitHub secrets or variables
+          # 2. The deploy-opencode.sh script captures these variables
+          # 3. Script creates a temporary .env file from all env variables
+          # 4. Script filters out system/GitHub internal variables
+          # 5. docker run --env-file injects them into the container
+          # 6. After container creation, .env file is deleted (security)
+          #
+          # HOW TO ADD YOUR VARIABLES:
+          # 
+          # For GitHub Secrets (Settings → Secrets and variables → Secrets):
+          # - Create secret in GitHub (e.g., DATABASE_URL)
+          # - Add here: DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          #
+          # For GitHub Variables (Settings → Variables):
+          # - Create variable in GitHub (e.g., LOG_LEVEL)
+          # - Add here: LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+          #
+          # EXAMPLE (uncomment and replace with your actual secrets):
+          # DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          # API_KEY: ${{ secrets.API_KEY }}
+          # ENVIRONMENT: ${{ vars.ENVIRONMENT }}
+          # LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+          # ═══════════════════════════════════════════════════════════════════
         run: |
           chmod +x scripts/deploy-opencode.sh
+          # The script will:
+          # 1. Create .env file with environment variables
+          # 2. Filter out system/GitHub internal variables
+          # 3. Pass variables to container via --env-file
+          # 4. Clean up temporary .env file after deployment
           ./scripts/deploy-opencode.sh "${{ env.REGISTRY }}/${{ env.REGISTRY_OWNER_LOWER }}/opencode:latest"
 
       - name: Verify deployment
