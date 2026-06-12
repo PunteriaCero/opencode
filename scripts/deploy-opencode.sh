@@ -15,6 +15,11 @@ echo "[INFO] Target image: ${IMAGE}"
 # ═══════════════════════════════════════════════════════════════════════════
 # OpenCode is a VS Code agent running in a Docker container as a web server.
 #
+# Server Command:
+# - Command: opencode serve
+# - Hostname: 0.0.0.0 (listen on all interfaces for remote access)
+# - Port: 4096 (default HTTP endpoint)
+#
 # Deployment Details:
 # - Web Server Port: 4096 (default HTTP endpoint)
 # - Access URL: http://localhost:4096 or http://your-host:4096
@@ -27,6 +32,11 @@ echo "[INFO] Target image: ${IMAGE}"
 # - Google Drive: For file management (requires GDRIVE credentials)
 # - Home Assistant: For smart home automation (remote connection)
 # - N8N: For workflow automation (requires N8N connection details)
+#
+# Optional Authentication:
+# - Set OPENCODE_SERVER_USERNAME environment variable (default: 'opencode')
+# - Set OPENCODE_SERVER_PASSWORD environment variable for HTTP Basic Auth
+# - If no password is set, server will warn about being unprotected
 #
 # The container runs as a background service with network access to expose
 # the web interface for local or remote access.
@@ -159,51 +169,10 @@ docker run -d \
   ${PORT_ARGS} \
   ${VOLUME_ARGS} \
   --env-file "$ENV_FILE" \
-  "${IMAGE}"
+  "${IMAGE}" \
+  opencode serve --hostname 0.0.0.0 --port 4096
 
 echo "[INFO] Deploy complete — '${CONTAINER}' is running with ${IMAGE}"
-
-# ═══════════════════════════════════════════════════════════════════════════
-# WEB SERVER HEALTH CHECK
-# ═══════════════════════════════════════════════════════════════════════════
-# Verify that OpenCode web server is responding on port 4096
-# ═══════════════════════════════════════════════════════════════════════════
-
-echo "[INFO] Waiting for web server to be ready..."
-MAX_ATTEMPTS=30
-ATTEMPT=0
-HEALTH_CHECK_PASSED=false
-
-while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-  ATTEMPT=$((ATTEMPT + 1))
-  
-  # Check if port 4096 is accessible
-  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:4096/ 2>/dev/null || echo "000")
-  
-  # Accept 200 (OK), 301 (redirect), 302 (found) as healthy responses
-  if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "301" ] || [ "$HTTP_STATUS" = "302" ]; then
-    echo "[SUCCESS] OpenCode web server is responding (HTTP $HTTP_STATUS)"
-    echo "[INFO] Access OpenCode at: http://localhost:4096"
-    HEALTH_CHECK_PASSED=true
-    break
-  fi
-  
-  if [ $ATTEMPT -eq 1 ]; then
-    echo "[INFO] Checking... (attempt $ATTEMPT/$MAX_ATTEMPTS, status: $HTTP_STATUS)"
-  elif [ $((ATTEMPT % 5)) -eq 0 ]; then
-    echo "[INFO] Still checking... (attempt $ATTEMPT/$MAX_ATTEMPTS, status: $HTTP_STATUS)"
-  fi
-  
-  sleep 1
-done
-
-if [ "$HEALTH_CHECK_PASSED" = true ]; then
-  echo "[INFO] ✓ Web server health check passed"
-else
-  echo "[WARNING] Web server health check did not receive expected response"
-  echo "[WARNING] OpenCode may still be initializing"
-  echo "[INFO] Manual check: curl http://localhost:4096"
-fi
 
 # ═══════════════════════════════════════════════════════════════════════════
 # CLEANUP: Remove temporary .env file
