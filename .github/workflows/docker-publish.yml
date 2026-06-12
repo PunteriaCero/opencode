@@ -86,21 +86,42 @@ jobs:
           # 5. docker run --env-file injects them into the container
           # 6. After container creation, .env file is deleted (security)
           #
-          # HOW TO ADD YOUR VARIABLES:
-          # 
-          # For GitHub Secrets (Settings → Secrets and variables → Secrets):
-          # - Create secret in GitHub (e.g., DATABASE_URL)
-          # - Add here: DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          #
-          # For GitHub Variables (Settings → Variables):
-          # - Create variable in GitHub (e.g., LOG_LEVEL)
-          # - Add here: LOG_LEVEL: ${{ vars.LOG_LEVEL }}
-          #
-          # EXAMPLE (uncomment and replace with your actual secrets):
-          # DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          # API_KEY: ${{ secrets.API_KEY }}
-          # ENVIRONMENT: ${{ vars.ENVIRONMENT }}
-          # LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+          # ═══════════════════════════════════════════════════════════════════
+          # GitHub Authentication
+          # ═══════════════════════════════════════════════════════════════════
+          GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+          
+          # ═══════════════════════════════════════════════════════════════════
+          # Portainer Configuration (Docker)
+          # ═══════════════════════════════════════════════════════════════════
+          PORTAINER_URL: ${{ vars.PORTAINER_URL }}
+          PORTAINER_PAT: ${{ secrets.PORTAINER_PAT }}
+          
+          # ═══════════════════════════════════════════════════════════════════
+          # N8N Workflow Automation
+          # ═══════════════════════════════════════════════════════════════════
+          N8N_API_URL: ${{ vars.N8N_API_URL }}
+          N8N_API_KEY: ${{ secrets.N8N_API_KEY }}
+          
+          # ═══════════════════════════════════════════════════════════════════
+          # Evolution API (WhatsApp)
+          # ═══════════════════════════════════════════════════════════════════
+          EVOLUTION_API_URL: ${{ vars.EVOLUTION_API_URL }}
+          EVOLUTION_API_KEY: ${{ secrets.EVOLUTION_API_KEY }}
+          EVOLUTION_API_INSTANCE: ${{ vars.EVOLUTION_API_INSTANCE }}
+          
+          # ═══════════════════════════════════════════════════════════════════
+          # Google Drive Integration
+          # ═══════════════════════════════════════════════════════════════════
+          GDRIVE_CLIENT_ID: ${{ vars.GDRIVE_CLIENT_ID }}
+          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          
+          # ═══════════════════════════════════════════════════════════════════
+          # Home Assistant Integration
+          # ═══════════════════════════════════════════════════════════════════
+          HA_URL: ${{ vars.HA_URL }}
+          HA_PAT: ${{ secrets.HA_PAT }}
           # ═══════════════════════════════════════════════════════════════════
         run: |
           chmod +x scripts/deploy-opencode.sh
