@@ -86,42 +86,45 @@ jobs:
           # 5. docker run --env-file injects them into the container
           # 6. After container creation, .env file is deleted (security)
           #
+          # NOTE: Use || '' to provide empty defaults for unconfigured variables
+          # This prevents YAML parsing errors when variables are not set
+          #
           # ═══════════════════════════════════════════════════════════════════
           # GitHub Authentication
           # ═══════════════════════════════════════════════════════════════════
-          GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+          GITHUB_PAT: ${{ secrets.GITHUB_PAT || '' }}
           
           # ═══════════════════════════════════════════════════════════════════
           # Portainer Configuration (Docker)
           # ═══════════════════════════════════════════════════════════════════
-          PORTAINER_URL: ${{ vars.PORTAINER_URL }}
-          PORTAINER_PAT: ${{ secrets.PORTAINER_PAT }}
+          PORTAINER_URL: ${{ vars.PORTAINER_URL || '' }}
+          PORTAINER_PAT: ${{ secrets.PORTAINER_PAT || '' }}
           
           # ═══════════════════════════════════════════════════════════════════
           # N8N Workflow Automation
           # ═══════════════════════════════════════════════════════════════════
-          N8N_API_URL: ${{ vars.N8N_API_URL }}
-          N8N_API_KEY: ${{ secrets.N8N_API_KEY }}
+          N8N_API_URL: ${{ vars.N8N_API_URL || '' }}
+          N8N_API_KEY: ${{ secrets.N8N_API_KEY || '' }}
           
           # ═══════════════════════════════════════════════════════════════════
           # Evolution API (WhatsApp)
           # ═══════════════════════════════════════════════════════════════════
-          EVOLUTION_API_URL: ${{ vars.EVOLUTION_API_URL }}
-          EVOLUTION_API_KEY: ${{ secrets.EVOLUTION_API_KEY }}
-          EVOLUTION_API_INSTANCE: ${{ vars.EVOLUTION_API_INSTANCE }}
+          EVOLUTION_API_URL: ${{ vars.EVOLUTION_API_URL || '' }}
+          EVOLUTION_API_KEY: ${{ secrets.EVOLUTION_API_KEY || '' }}
+          EVOLUTION_API_INSTANCE: ${{ vars.EVOLUTION_API_INSTANCE || '' }}
           
           # ═══════════════════════════════════════════════════════════════════
           # Google Drive Integration
           # ═══════════════════════════════════════════════════════════════════
-          GDRIVE_CLIENT_ID: ${{ vars.GDRIVE_CLIENT_ID }}
-          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
-          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          GDRIVE_CLIENT_ID: ${{ vars.GDRIVE_CLIENT_ID || '' }}
+          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET || '' }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN || '' }}
           
           # ═══════════════════════════════════════════════════════════════════
           # Home Assistant Integration
           # ═══════════════════════════════════════════════════════════════════
-          HA_URL: ${{ vars.HA_URL }}
-          HA_PAT: ${{ secrets.HA_PAT }}
+          HA_URL: ${{ vars.HA_URL || '' }}
+          HA_PAT: ${{ secrets.HA_PAT || '' }}
           # ═══════════════════════════════════════════════════════════════════
         run: |
           chmod +x scripts/deploy-opencode.sh
