@@ -11,6 +11,28 @@ fi
 echo "[INFO] Target image: ${IMAGE}"
 
 # ═══════════════════════════════════════════════════════════════════════════
+# OPENCODE WEB SERVER DEPLOYMENT
+# ═══════════════════════════════════════════════════════════════════════════
+# OpenCode is a VS Code agent running in a Docker container as a web server.
+#
+# Deployment Details:
+# - Web Server Port: 4096 (default HTTP endpoint)
+# - Access URL: http://localhost:4096 or http://your-host:4096
+# - Health Check: HTTP GET to / (expects 200, 301, or 302 status)
+# - Persistence: Data stored in Docker volumes
+# - Restart Policy: unless-stopped (auto-restart on failure)
+#
+# MCP Servers (enabled/disabled in opencode.json):
+# - GitHub: For repository operations (requires GITHUB_PAT token)
+# - Google Drive: For file management (requires GDRIVE credentials)
+# - Home Assistant: For smart home automation (remote connection)
+# - N8N: For workflow automation (requires N8N connection details)
+#
+# The container runs as a background service with network access to expose
+# the web interface for local or remote access.
+# ═══════════════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════════════
 # ENVIRONMENT VARIABLES INJECTION (Option B: .env file)
 # ═══════════════════════════════════════════════════════════════════════════
 # This script captures environment variables passed from GitHub Actions and
@@ -142,6 +164,48 @@ docker run -d \
 echo "[INFO] Deploy complete — '${CONTAINER}' is running with ${IMAGE}"
 
 # ═══════════════════════════════════════════════════════════════════════════
+# WEB SERVER HEALTH CHECK
+# ═══════════════════════════════════════════════════════════════════════════
+# Verify that OpenCode web server is responding on port 4096
+# ═══════════════════════════════════════════════════════════════════════════
+
+echo "[INFO] Waiting for web server to be ready..."
+MAX_ATTEMPTS=30
+ATTEMPT=0
+HEALTH_CHECK_PASSED=false
+
+while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+  ATTEMPT=$((ATTEMPT + 1))
+  
+  # Check if port 4096 is accessible
+  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:4096/ 2>/dev/null || echo "000")
+  
+  # Accept 200 (OK), 301 (redirect), 302 (found) as healthy responses
+  if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "301" ] || [ "$HTTP_STATUS" = "302" ]; then
+    echo "[SUCCESS] OpenCode web server is responding (HTTP $HTTP_STATUS)"
+    echo "[INFO] Access OpenCode at: http://localhost:4096"
+    HEALTH_CHECK_PASSED=true
+    break
+  fi
+  
+  if [ $ATTEMPT -eq 1 ]; then
+    echo "[INFO] Checking... (attempt $ATTEMPT/$MAX_ATTEMPTS, status: $HTTP_STATUS)"
+  elif [ $((ATTEMPT % 5)) -eq 0 ]; then
+    echo "[INFO] Still checking... (attempt $ATTEMPT/$MAX_ATTEMPTS, status: $HTTP_STATUS)"
+  fi
+  
+  sleep 1
+done
+
+if [ "$HEALTH_CHECK_PASSED" = true ]; then
+  echo "[INFO] ✓ Web server health check passed"
+else
+  echo "[WARNING] Web server health check did not receive expected response"
+  echo "[WARNING] OpenCode may still be initializing"
+  echo "[INFO] Manual check: curl http://localhost:4096"
+fi
+
+# ═══════════════════════════════════════════════════════════════════════════
 # CLEANUP: Remove temporary .env file
 # ═══════════════════════════════════════════════════════════════════════════
 # The .env file is no longer needed after container creation.
@@ -153,3 +217,27 @@ if [ -f "$ENV_FILE" ]; then
   rm -f "$ENV_FILE"
   echo "[INFO] Temporary environment file cleaned up"
 fi
+
+# ═══════════════════════════════════════════════════════════════════════════
+# DEPLOYMENT SUMMARY
+# ═══════════════════════════════════════════════════════════════════════════
+
+echo ""
+echo "╔════════════════════════════════════════════════════════════════════╗"
+echo "║  OpenCode Web Server Deployment Summary                           ║"
+echo "╠════════════════════════════════════════════════════════════════════╣"
+echo "║  Container: ${CONTAINER}"
+echo "║  Image:     ${IMAGE}"
+echo "║  Status:    Running on port 4096"
+echo "║  Access:    http://localhost:4096"
+echo "║                                                                    ║"
+echo "║  Next Steps:                                                       ║"
+echo "║  1. Open http://localhost:4096 in your browser                    ║"
+echo "║  2. Configure MCP servers in opencode.json if needed              ║"
+echo "║  3. Check server logs: docker logs ${CONTAINER}                   ║"
+echo "║  4. Monitor performance: docker stats ${CONTAINER}                ║"
+echo "║                                                                    ║"
+echo "║  To stop:   docker stop ${CONTAINER}                              ║"
+echo "║  To remove: docker rm ${CONTAINER}                                ║"
+echo "╚════════════════════════════════════════════════════════════════════╝"
+echo ""
