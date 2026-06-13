@@ -1,6 +1,6 @@
 ---
 name: github-ops
-description: Use git with GITHUB_PAT token for GitHub push operations, authentication, and repository management. Load this skill for pushing code changes to GitHub repositories.
+description: Use git with GHUB_PAT token for GitHub push operations, authentication, and repository management. Load this skill for pushing code changes to GitHub repositories.
 license: MIT
 compatibility: opencode
 metadata:
@@ -12,17 +12,17 @@ metadata:
 
 ## Overview
 
-This skill provides comprehensive guidance on GitHub operations using the `GITHUB_PAT` (Personal Access Token) for authentication with git and GitHub CLI operations.
+This skill provides comprehensive guidance on GitHub operations using the `GHUB_PAT` (Personal Access Token) for authentication with git and GitHub CLI operations.
 
 ## Authentication Configuration
 
-The agent MUST use the `GITHUB_PAT` environment variable for all git operations.
+The agent MUST use the `GHUB_PAT` environment variable for all git operations.
 
 ### Option 1: Configure git credential helper (Recommended)
 
 ```bash
 git config --global credential.helper store
-echo "https://:${GITHUB_PAT}@github.com" >> ~/.git-credentials
+echo "https://:${GHUB_PAT}@github.com" >> ~/.git-credentials
 git config --global user.name "OpenCode Agent"
 git config --global user.email "opencode@anomaly.co"
 ```
@@ -40,20 +40,20 @@ git push
 For one-off operations without permanent configuration:
 
 ```bash
-git -c credential.helper='!echo "username=git"; echo "password=${GITHUB_PAT}"' push
+git -c credential.helper='!echo "username=git"; echo "password=${GHUB_PAT}"' push
 ```
 
 Or with all git operations:
 
 ```bash
-git -c credential.helper='!echo "username=git"; echo "password=${GITHUB_PAT}"' add -A
-git -c credential.helper='!echo "username=git"; echo "password=${GITHUB_PAT}"' commit -m "message"
-git -c credential.helper='!echo "username=git"; echo "password=${GITHUB_PAT}"' push
+git -c credential.helper='!echo "username=git"; echo "password=${GHUB_PAT}"' add -A
+git -c credential.helper='!echo "username=git"; echo "password=${GHUB_PAT}"' commit -m "message"
+git -c credential.helper='!echo "username=git"; echo "password=${GHUB_PAT}"' push
 ```
 
 ## Important Rules
 
-- **CRITICAL:** The agent MUST ALWAYS use `git push` with the `GITHUB_PAT` token to upload changes to any repository
+- **CRITICAL:** The agent MUST ALWAYS use `git push` with the `GHUB_PAT` token to upload changes to any repository
 - **NEVER** use MCP GitHub tools (`github_push_files`, `github_create_or_update_file`, `github_create_pull_request`, etc.) for pushing code changes
 - ONLY use MCP GitHub tools for read-only operations like:
   - Listing issues and pull requests
@@ -77,13 +77,13 @@ When pushing changes to any GitHub repository:
 
 3. Push using the PAT token:
    ```bash
-   git -c credential.helper='!echo "username=git"; echo "password=${GITHUB_PAT}"' push
+   git -c credential.helper='!echo "username=git"; echo "password=${GHUB_PAT}"' push
    ```
 
 Or in a single command chain:
 
 ```bash
-git add -A && git commit -m "message" && git -c credential.helper='!echo "username=git"; echo "password=${GITHUB_PAT}"' push
+git add -A && git commit -m "message" && git -c credential.helper='!echo "username=git"; echo "password=${GHUB_PAT}"' push
 ```
 
 ## Troubleshooting
@@ -93,7 +93,7 @@ git add -A && git commit -m "message" && git -c credential.helper='!echo "userna
 If you encounter "fatal: Authentication failed", verify the PAT token:
 
 ```bash
-echo $GITHUB_PAT
+echo $GHUB_PAT
 ```
 
 Ensure the token has the necessary scopes:
@@ -108,7 +108,7 @@ To reset git credentials:
 ```bash
 rm ~/.git-credentials
 git config --global credential.helper store
-echo "https://:${GITHUB_PAT}@github.com" >> ~/.git-credentials
+echo "https://:${GHUB_PAT}@github.com" >> ~/.git-credentials
 ```
 
 ## MCP GitHub Tools Usage

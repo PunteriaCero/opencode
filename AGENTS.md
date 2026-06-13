@@ -45,7 +45,7 @@ This skill provides comprehensive documentation and best practices for all n8n-c
 
 ## GitHub Operations
 
-**The agent MUST ALWAYS use `git` with the `GITHUB_PAT` token for uploading changes to any GitHub repository.**
+**The agent MUST ALWAYS use `git` with the `GHUB_PAT` token for uploading changes to any GitHub repository.**
 
 For detailed documentation on GitHub authentication, push operations, and best practices, load the GitHub Operations skill:
 
@@ -57,7 +57,7 @@ skill load github-ops
 
 - **NEVER** use MCP GitHub tools for pushing code changes
 - ONLY use MCP GitHub tools for read-only operations (listing, searching, getting information)
-- Always use `GITHUB_PAT` environment variable for authentication
+- Always use `GHUB_PAT` environment variable for authentication
 - All push operations MUST go through git CLI
 
 ---

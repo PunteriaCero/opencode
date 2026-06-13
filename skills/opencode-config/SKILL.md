@@ -34,7 +34,7 @@ Example commit messages:
 After committing, you MUST push the changes to GitHub using:
 
 ```bash
-cd /root/.config/opencode && git -c credential.helper='!echo "username=git"; echo "password=${GITHUB_PAT}"' push
+cd /root/.config/opencode && git -c credential.helper='!echo "username=git"; echo "password=${GHUB_PAT}"' push
 ```
 
 Or if git credentials are pre-configured:
@@ -80,7 +80,7 @@ portainerctl container restart <container_id> --env 3
    ```
 4. Push to GitHub:
    ```bash
-   git -c credential.helper='!echo "username=git"; echo "password=${GITHUB_PAT}"' push
+   git -c credential.helper='!echo "username=git"; echo "password=${GHUB_PAT}"' push
    ```
 5. Restart OpenCode container:
    ```bash

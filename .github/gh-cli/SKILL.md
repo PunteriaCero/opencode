@@ -25,7 +25,7 @@ Load this skill when the user asks to:
 
 ## Authentication
 
-`gh` is already authenticated via `GITHUB_PAT` environment variable. The active account is `hlavrencic` on `github.com`.
+`gh` is already authenticated via `GHUB_PAT` environment variable. The active account is `hlavrencic` on `github.com`.
 
 To verify: `gh auth status`
 

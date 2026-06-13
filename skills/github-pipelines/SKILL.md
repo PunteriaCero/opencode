@@ -34,7 +34,7 @@ Load this skill when you need to:
 
 ## Authentication
 
-GitHub CLI (`gh`) is already authenticated via `GITHUB_PAT` environment variable.
+GitHub CLI (`gh`) is already authenticated via `GHUB_PAT` environment variable.
 
 Verify with: `gh auth status`
 

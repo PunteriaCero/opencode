@@ -2,7 +2,7 @@
 
 ## Overview
 
-This skill directory contains resources for GitHub operations with secure authentication using `GITHUB_PAT`.
+This skill directory contains resources for GitHub operations with secure authentication using `GHUB_PAT`.
 
 ## Contents
 

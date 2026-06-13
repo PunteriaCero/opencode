@@ -28,7 +28,7 @@ echo "[INFO] Target image: ${IMAGE}"
 # - Restart Policy: unless-stopped (auto-restart on failure)
 #
 # MCP Servers (enabled/disabled in opencode.json):
-# - GitHub: For repository operations (requires GITHUB_PAT token)
+# - GitHub: For repository operations (requires GHUB_PAT token)
 # - Google Drive: For file management (requires GDRIVE credentials)
 # - Home Assistant: For smart home automation (remote connection)
 # - N8N: For workflow automation (requires N8N connection details)

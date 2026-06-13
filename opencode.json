@@ -45,7 +45,7 @@
       ],
       "enabled": true,
       "environment": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "{env:GITHUB_PAT}"
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "{env:GHUB_PAT}"
       }
     },
     "gdrive": {
