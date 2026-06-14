@@ -23,7 +23,10 @@ services:
     restart: unless-stopped
     volumes:
       - opencode_data:/app/data
+      - opencode_ssh:/root/.ssh
 
 volumes:
   opencode_data:
+    driver: local
+  opencode_ssh:
     driver: local
