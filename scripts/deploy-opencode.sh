@@ -184,7 +184,8 @@ echo "[INFO] Stopping and recreating '${CONTAINER}'..."
 docker-compose down --remove-orphans || true
 
 echo "[INFO] Starting new container with docker-compose..."
-docker-compose up -d
+# Use --env-file to inject variables into docker-compose
+docker-compose --env-file "$ENV_FILE" up -d
 
 # Clean up override
 rm -f "$COMPOSE_OVERRIDE"

@@ -19,7 +19,7 @@ services:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
     env_file:
-      - .env
+      - .env.opencode
     restart: unless-stopped
     volumes:
       - opencode_data:/app/data
