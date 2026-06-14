@@ -25,6 +25,7 @@ echo "[INFO] Target image: ${IMAGE}"
 # - Access URL: http://localhost:4096 or http://your-host:4096
 # - Health Check: HTTP GET to / (expects 200, 301, or 302 status)
 # - Persistence: Data stored in Docker volumes
+# - SSH Keys: Persistent volume at /root/.ssh (for git operations)
 # - Restart Policy: unless-stopped (auto-restart on failure)
 #
 # MCP Servers (enabled/disabled in opencode.json):
