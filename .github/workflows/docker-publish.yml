@@ -148,17 +148,17 @@ jobs:
             echo "[WARNING] OpenCode health check returned HTTP $HTTP_STATUS (may still be starting)"
           fi
 
-       - name: Deployment summary
-         if: success()
-         run: |
-           echo "[SUCCESS] OpenCode deployed to local environment"
-           echo "Image: ${{ env.REGISTRY }}/${{ env.REGISTRY_OWNER_LOWER }}/opencode:latest"
-           echo ""
-           echo "Persistent Volumes:"
-           echo "  - opencode_data: Application data and configuration"
-           echo "  - opencode_ssh: SSH keys for Git authentication (preserved across restarts)"
-           echo ""
-           echo "SSH Configuration:"
-           echo "  - SSH keys are stored in a persistent volume"
-           echo "  - GitHub SSH keys added to this container are retained on restart"
-           echo "  - Location: ~/.ssh (inside container), mapped to opencode_ssh volume"
+      - name: Deployment summary
+        if: success()
+        run: |
+          echo "[SUCCESS] OpenCode deployed to local environment"
+          echo "Image: ${{ env.REGISTRY }}/${{ env.REGISTRY_OWNER_LOWER }}/opencode:latest"
+          echo ""
+          echo "Persistent Volumes:"
+          echo "  - opencode_data: Application data and configuration"
+          echo "  - opencode_ssh: SSH keys for Git authentication (preserved across restarts)"
+          echo ""
+          echo "SSH Configuration:"
+          echo "  - SSH keys are stored in a persistent volume"
+          echo "  - GitHub SSH keys added to this container are retained on restart"
+          echo "  - Location: ~/.ssh (inside container), mapped to opencode_ssh volume"
