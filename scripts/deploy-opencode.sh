@@ -143,34 +143,51 @@ while IFS= read -r line; do
   PORT_ARGS="${PORT_ARGS} -p ${host_port}:${container_port}"
 done < <(docker port "${CONTAINER}" 2>/dev/null || true)
 
-# Volume mounts: -v source:destination
+# Volume mounts: Extract named volumes and bind mounts
+# Named volumes format: -v volume_name:/path/in/container
+# Bind mounts format: -v /host/path:/container/path
 VOLUME_ARGS=$(docker inspect "${CONTAINER}" \
-  --format '{{range .Mounts}}-v {{.Source}}:{{.Destination}} {{end}}')
+  --format '{{range .Mounts}}{{if eq .Type "volume"}}-v {{.Name}}:{{.Destination}} {{else}}-v {{.Source}}:{{.Destination}} {{end}}{{end}}')
 
 echo "[INFO] Restart policy : ${RESTART}"
 echo "[INFO] Network        : ${NETWORK}"
 echo "[INFO] Ports          : ${PORT_ARGS}"
 echo "[INFO] Volumes        : ${VOLUME_ARGS}"
 
+# Validate that we have persistent volumes configured
+if [[ ! "$VOLUME_ARGS" =~ opencode_data ]]; then
+  echo "[WARNING] Named volume 'opencode_data' not found in container configuration"
+fi
+
+if [[ ! "$VOLUME_ARGS" =~ opencode_ssh ]]; then
+  echo "[WARNING] Named volume 'opencode_ssh' not found in container configuration"
+fi
+
 # --- Pull new image ---
 echo "[INFO] Pulling ${IMAGE}..."
 docker pull "${IMAGE}"
 
-# --- Recreate container ---
-echo "[INFO] Stopping and removing '${CONTAINER}'..."
-docker stop "${CONTAINER}"
-docker rm "${CONTAINER}"
+# --- Update docker-compose.yml with new image ---
+# Create temporary docker-compose override to use the new image
+COMPOSE_OVERRIDE="docker-compose.override.yml"
 
-echo "[INFO] Starting new container..."
-# shellcheck disable=SC2086
-docker run -d \
-  --name "${CONTAINER}" \
-  --restart "${RESTART}" \
-  --network "${NETWORK}" \
-  ${PORT_ARGS} \
-  ${VOLUME_ARGS} \
-  --env-file "$ENV_FILE" \
-  "${IMAGE}"
+echo "[INFO] Creating temporary docker-compose override with new image..."
+cat > "$COMPOSE_OVERRIDE" << EOF
+version: '3.8'
+services:
+  opencode:
+    image: ${IMAGE}
+EOF
+
+# --- Recreate container using docker-compose ---
+echo "[INFO] Stopping and recreating '${CONTAINER}'..."
+docker-compose down --remove-orphans || true
+
+echo "[INFO] Starting new container with docker-compose..."
+docker-compose up -d
+
+# Clean up override
+rm -f "$COMPOSE_OVERRIDE"
 
 echo "[INFO] Deploy complete — '${CONTAINER}' is running with ${IMAGE}"
 
@@ -200,13 +217,25 @@ echo "║  Image:     ${IMAGE}"
 echo "║  Status:    Running on port 4096"
 echo "║  Access:    http://localhost:4096"
 echo "║                                                                    ║"
+echo "║  Persistent Volumes:                                              ║"
+echo "║  • opencode_data: Application data & configuration                ║"
+echo "║  • opencode_ssh: SSH keys for Git authentication                  ║"
+echo "║                                                                    ║"
+echo "║  SSH Configuration:                                                ║"
+echo "║  • SSH keys are preserved across container restarts               ║"
+echo "║  • Add GitHub keys to ~/.ssh for git push operations              ║"
+echo "║  • Location in container: ~/.ssh (persistent volume)              ║"
+echo "║                                                                    ║"
 echo "║  Next Steps:                                                       ║"
 echo "║  1. Open http://localhost:4096 in your browser                    ║"
 echo "║  2. Configure MCP servers in opencode.json if needed              ║"
-echo "║  3. Check server logs: docker logs ${CONTAINER}                   ║"
-echo "║  4. Monitor performance: docker stats ${CONTAINER}                ║"
+echo "║  3. Add SSH keys for GitHub: https://github.com/settings/keys     ║"
+echo "║  4. Check server logs: docker logs ${CONTAINER}                   ║"
+echo "║  5. Monitor performance: docker stats ${CONTAINER}                ║"
 echo "║                                                                    ║"
-echo "║  To stop:   docker stop ${CONTAINER}                              ║"
-echo "║  To remove: docker rm ${CONTAINER}                                ║"
+echo "║  To manage:                                                        ║"
+echo "║  • Stop:  docker-compose down                                      ║"
+echo "║  • Start: docker-compose up -d                                     ║"
+echo "║  • Logs:  docker-compose logs -f                                   ║"
 echo "╚════════════════════════════════════════════════════════════════════╝"
 echo ""
