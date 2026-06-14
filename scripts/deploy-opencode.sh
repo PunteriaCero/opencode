@@ -181,7 +181,10 @@ EOF
 
 # --- Recreate container using docker-compose ---
 echo "[INFO] Stopping and recreating '${CONTAINER}'..."
-docker-compose down --remove-orphans || true
+# Force remove the container and volumes
+docker-compose down --remove-orphans --volumes || true
+docker stop "${CONTAINER}" 2>/dev/null || true
+docker rm -f "${CONTAINER}" 2>/dev/null || true
 
 echo "[INFO] Starting new container with docker-compose..."
 # Use --env-file to inject variables into docker-compose
