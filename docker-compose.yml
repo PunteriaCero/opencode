@@ -35,7 +35,7 @@ services:
     restart: unless-stopped
     volumes:
       # XDG_CONFIG_HOME - Configuración (opencode.json, directorio de config)
-      - /DATA/AppData/opencode/root_config:/.config/opencode
+      - /DATA/AppData/opencode/root_config:/root/.config/opencode
       # Workspace y proyectos (volumen adicional para área de trabajo)
       - /DATA/AppData/opencode/workspace:/workspace
       # SSH keys de CasaOS (solo lectura)
