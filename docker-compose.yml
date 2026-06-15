@@ -6,27 +6,41 @@ services:
     container_name: opencode
     network_mode: host
     environment:
+      # Aplicación
       - APP_NAME=${APP_NAME}
       - APP_ENV=${APP_ENV}
       - APP_DEBUG=${APP_DEBUG}
       - NODE_ENV=${NODE_ENV}
       - LOG_LEVEL=${LOG_LEVEL}
+      # Base de datos
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
+      # Redis
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
+      # XDG Base Directory Specification (estándar OpenCode)
+      # Datos: logs, auth.json, repos, storage, snapshots, tool-output
+      - XDG_DATA_HOME=/app/data
+      # Cache: binarios descargados, herramientas
+      - XDG_CACHE_HOME=/app/cache
+      # Configuración: opencode.json y archivos de config
+      - XDG_CONFIG_HOME=/app/config
+      # Estado: archivos de estado de la aplicación
+      - XDG_STATE_HOME=/app/state
     env_file:
       - .env.opencode
     restart: unless-stopped
     volumes:
-      - opencode_data:/app/data
-      - opencode_ssh:/root/.ssh
-
-volumes:
-  opencode_data:
-    driver: local
-  opencode_ssh:
-    driver: local
+      # XDG_DATA_HOME - Datos persistentes (auth.json, logs, repos, storage, snapshots, tool-output)
+      - /DATA/AppData/opencode/data:/app/data
+      # XDG_CACHE_HOME - Cache de descarga (binarios, tools)
+      - /DATA/AppData/opencode/cache:/app/cache
+      # XDG_CONFIG_HOME - Configuración (opencode.json, directorio de config)
+      - /DATA/AppData/opencode/root_config:/app/config
+      # XDG_STATE_HOME - Estado de la aplicación
+      - /DATA/AppData/opencode/state:/app/state
+      # Workspace y proyectos (volumen adicional para área de trabajo)
+      - /DATA/AppData/opencode/workspace:/app/workspace
