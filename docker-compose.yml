@@ -43,6 +43,6 @@ services:
       # XDG_STATE_HOME - Estado de la aplicación
       - /DATA/AppData/opencode/state:/app/state
       # Workspace y proyectos (volumen adicional para área de trabajo)
-      - /DATA/AppData/opencode/workspace:/app/workspace
+      - /DATA/AppData/opencode/workspace:/workspace
       # SSH keys de CasaOS (solo lectura)
       - /root/.ssh:/root/.ssh:ro
