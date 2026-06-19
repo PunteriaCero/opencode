@@ -29,7 +29,7 @@
         "-y",
         "portainer-mcp-server"
       ],
-      "enabled": false,
+      "enabled": true,
       "environment": {
         "PORTAINER_URL": "{env:PORTAINER_URL}",
         "PORTAINER_PAT": "{env:PORTAINER_PAT}",
