@@ -36,6 +36,12 @@ services:
     volumes:
       # XDG_CONFIG_HOME - Configuración (opencode.json, directorio de config)
       - /DATA/AppData/opencode/root_config:/root/.config/opencode
+      # XDG_DATA_HOME - Datos: sesiones, logs, auth.json, repos, snapshots
+      - /DATA/AppData/opencode/data:/app/data
+      # XDG_CACHE_HOME - Cache: binarios descargados, herramientas
+      - /DATA/AppData/opencode/cache:/app/cache
+      # XDG_STATE_HOME - Estado de la aplicación
+      - /DATA/AppData/opencode/state:/app/state
       # Workspace y proyectos (volumen adicional para área de trabajo)
       - /DATA/AppData/opencode/workspace:/workspace
       # SSH keys de CasaOS (solo lectura)
